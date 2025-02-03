@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-import { Star } from 'lucide-react';
+import { Star, MapPin, Users, Clock } from 'lucide-react';
 
 const TopDoctors = () => {
   const navigate = useNavigate();
@@ -13,85 +13,103 @@ const TopDoctors = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 my-16 text-gray-900 md:mx-10">
-      <h1 className="text-3xl font-medium">Top Doctors to Book</h1>
-      <p className="sm:w-1/3 text-center text-sm">
-        Simply browse through our extensive list of trusted doctors.
-      </p>
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-5 px-3 sm:px-0">
-        {doctors.slice(0, 10).map((item, index) => (
-          <div
-            className="relative bg-white border border-blue-100 shadow-lg rounded-xl p-6 flex flex-col items-center text-center 
-            transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl group cursor-pointer"
-            key={index}
-            onClick={() => handleClick(item._id)}
-          >
-            {/* Subtle gradient overlay */}
+    <div className="w-full">
+      <div className="flex flex-col items-center gap-6 my-5 py-12 px-4 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+            Top-Rated Doctors
+          </h1>
+          <div className="w-16 sm:w-20 md:w-24 h-1 bg-blue-500 mx-auto mb-4 rounded-full"></div>
+          <p className="text-gray-600 text-sm sm:text-base md:text-lg text-center px-4 md:px-0">
+            Connect with our highly qualified and experienced medical professionals
+          </p>
+        </div>
+
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {doctors.slice(0, 8).map((doctor, index) => (
             <div
-              className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 opacity-50 rounded-xl -z-10 
-              group-hover:opacity-75 transition-all duration-300"
-            ></div>
+              key={index}
+              onClick={() => handleClick(doctor._id)}
+              className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl 
+                       transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            >
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 opacity-10"></div>
+                <div className="h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]"></div>
+              </div>
 
-            {/* Availability Badge */}
-            <div className="absolute top-4 left-4">
-              {item.available ? (
-                <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-200">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span className="text-green-700 text-xs font-medium">Available</span>
+              {/* Content Container */}
+              <div className="relative p-6">
+                {/* Availability Badge - Updated Styling */}
+                <div className="absolute top-3 right-3 z-10">
+                  {doctor.available ? (
+                    <div className="inline-flex items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-200">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-green-700 text-xs font-medium whitespace-nowrap">Available</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1 bg-red-50 px-2 py-1 rounded-full border border-red-200">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      <span className="text-red-700 text-xs font-medium whitespace-nowrap">Unavailable</span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex items-center gap-1 bg-red-50 px-2 py-1 rounded-full border border-red-200">
-                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                  <span className="text-red-700 text-xs font-medium">Not Available</span>
-                </div>
-              )}
-            </div>
 
-            {/* Rating Badge */}
-            <div className="absolute top-4 right-4">
-              <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full border border-yellow-200">
-                <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                <span className="text-yellow-700 text-xs font-medium">
-                  {item.rating || 4.8}
-                </span>
+                {/* Doctor Image */}
+                <div className="relative w-32 h-32 mx-auto mb-6">
+                  <div className="absolute inset-0 bg-blue-200 rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <img
+                    src={doctor.image}
+                    alt={doctor.name}
+                    className="relative w-full h-full object-cover rounded-full border-4 border-white shadow-lg 
+                             group-hover:border-blue-100 transition-colors duration-300"
+                  />
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full border border-yellow-200 shadow-md">
+                      <Star className="w-3.5 h-3.5 text-yellow-500 fill-current" />
+                      <span className="text-yellow-700 text-sm font-semibold">{doctor.rating || 4.8}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Doctor Info */}
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    {doctor.name}
+                  </h3>
+                  <p className="text-blue-600 font-medium mb-2">{doctor.speciality}</p>
+                  <div className="flex items-center justify-center gap-2 text-gray-500">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm">
+                      {doctor.address?.line1 ? `${doctor.address.line1}${doctor.address?.line2 ? `, ${doctor.address.line2}` : ""}` : "Address not available"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Book Button */}
+                <button className="w-full bg-blue-50 text-blue-600 py-2.5 rounded-xl font-medium 
+                                 hover:bg-blue-100 transition-colors duration-300 group-hover:bg-blue-600 
+                                 group-hover:text-white border border-blue-200 group-hover:border-blue-600">
+                  Book Appointment
+                </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Doctor Image with enhanced border and shadow */}
-            <div className="relative w-28 h-28 mb-4 mt-4">
-              <div className="absolute -inset-1 bg-blue-200 rounded-full blur-sm group-hover:opacity-75 transition-all duration-300"></div>
-              <img
-                className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg relative z-10"
-                src={item.image}
-                alt={item.name}
-              />
-            </div>
-
-            {/* Doctor Details */}
-            <h3 className="text-xl font-bold text-gray-800 mb-1">{item.name}</h3>
-            <p className="text-sm text-gray-600 mb-1">{item.speciality}</p>
-            <p className="text-sm text-gray-600 mb-3">{item.location}</p>
-
-            {/* Experience Badge */}
-            <div
-              className="mt-auto px-3 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full 
-              flex items-center shadow-md group-hover:bg-blue-100 transition-all duration-300 text-xs border border-blue-300 group-hover:border-blue-400"
-            >
-              100+ Patients served on MediLink
-            </div>
-          </div>
-        ))}
+        <button
+          onClick={() => {
+            navigate("/doctors");
+            window.scrollTo(0, 0);
+          }}
+          className="mt-12 px-8 py-3 bg-blue-600 text-white rounded-full font-medium
+                     hover:bg-blue-700 transition-colors duration-300 shadow-lg
+                     hover:shadow-blue-200 flex items-center gap-2"
+        >
+          View All Doctors
+        </button>
       </div>
-
-      <button
-        onClick={() => {
-          navigate("/doctors");
-          window.scrollTo(0, 0);
-        }}
-        className="bg-blue-50 text-gray-600 px-12 py-3 rounded-full mt-10 hover:bg-blue-100 transition-colors"
-      >
-        More
-      </button>
     </div>
   );
 };

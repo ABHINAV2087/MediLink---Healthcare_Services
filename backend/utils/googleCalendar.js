@@ -1,6 +1,21 @@
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'GOOGLE_REFRESH_TOKEN',
+  'EMAIL_USER',
+  'EMAIL_PASSWORD',
+];
+
+requiredEnvVars.forEach((envVar) => {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+});
+
 // Google OAuth2 Client
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -15,6 +30,20 @@ oauth2Client.setCredentials({
 
 // Google Calendar API instance
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+/**
+ * Function to refresh the access token.
+ */
+const refreshAccessToken = async () => {
+  try {
+    const { credentials } = await oauth2Client.refreshToken(process.env.GOOGLE_REFRESH_TOKEN);
+    oauth2Client.setCredentials(credentials);
+    console.log('Access token refreshed successfully');
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    throw new Error('Failed to refresh access token. Please re-authenticate.');
+  }
+};
 
 /**
  * Function to create a Google Calendar event with a Meet link.
@@ -54,11 +83,11 @@ export const createGoogleMeetEvent = async (appointmentData) => {
     description: `Virtual appointment with Dr. ${docData.name} (${docData.speciality}).`,
     start: {
       dateTime: startTime.toISOString(),
-      timeZone: 'UTC',
+      timeZone: 'Asia/Kolkata', // Replace with the appropriate time zone
     },
     end: {
       dateTime: endTime.toISOString(),
-      timeZone: 'UTC',
+      timeZone: 'Asia/Kolkata', // Replace with the appropriate time zone
     },
     conferenceData: {
       createRequest: {
@@ -75,6 +104,7 @@ export const createGoogleMeetEvent = async (appointmentData) => {
   };
 
   try {
+    console.log('Creating Google Meet event for appointment:', appointmentData._id);
     const response = await calendar.events.insert({
       calendarId: 'primary',
       resource: event,
@@ -82,10 +112,27 @@ export const createGoogleMeetEvent = async (appointmentData) => {
     });
 
     const meetLink = response.data.hangoutLink;
+    console.log('Google Meet event created successfully. Meet link:', meetLink);
     return meetLink;
   } catch (error) {
-    console.error('Error creating Google Meet event:', error);
-    throw error;
+    if (error.response && error.response.status === 401) {
+      // Token expired, refresh the token and retry
+      console.log('Access token expired. Refreshing token...');
+      await refreshAccessToken();
+      const response = await calendar.events.insert({
+        calendarId: 'primary',
+        resource: event,
+        conferenceDataVersion: 1,
+      });
+      return response.data.hangoutLink;
+    } else {
+      console.error('Error creating Google Meet event:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+      });
+      throw new Error('Failed to create Google Meet event. Please try again.');
+    }
   }
 };
 
@@ -105,52 +152,39 @@ export const sendMeetLinkEmail = async (userData, meetLink, appointmentData) => 
     },
   });
 
-  const emailContent = `Dear ${userData.name},
-
-Your virtual consultation with MediLink is scheduled to begin soon. Please find your secure video consultation link below.
-
-🎥 VIDEO CONSULTATION ACCESS
-━━━━━━━━━━━━━━━━━━━━━━━━
-• Join Link: ${meetLink}
-• Doctor: ${appointmentData.docData.name}
-• Date: ${formatDate(appointmentData.slotDate)}
-• Time: ${formatTime(appointmentData.slotTime)} 
-• Duration: 30 minutes
-
-⚡ QUICK TECHNICAL CHECKLIST
-━━━━━━━━━━━━━━━━━━━━━━━
-✓ Test your internet connection
-✓ Check camera and microphone
-
-📝 JOINING INSTRUCTIONS
-━━━━━━━━━━━━━━━━━━━━
-1. Click the join link above
-2. Allow camera and microphone access
-3. Enter your name if prompted
-4. Doctor will admit you at appointment time
-
-💡 FOR BEST EXPERIENCE
-━━━━━━━━━━━━━━━━━━
-• Join 5 minutes before scheduled time
-• Use Chrome or Firefox browser
-
-• Have medical documents ready
-
-❗ NEED HELP?
-━━━━━━━━━━━
-Having technical issues?
-
-• Email: support@medilink.com
-
-
-We're looking forward to your virtual consultation.
-
-Best regards,
-Team MediLink
-
-Note: This is a secure link. Please do not share it with others.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MediLink Healthcare Services | Privacy Policy | Terms of Service`;
+  const emailContent = `
+    <p>Dear ${userData.name},</p>
+    <p>Your virtual consultation with MediLink is scheduled to begin soon. Please find your secure video consultation link below.</p>
+    <h3>🎥 VIDEO CONSULTATION ACCESS</h3>
+    <p><strong>Join Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
+    <p><strong>Doctor:</strong> ${appointmentData.docData.name}</p>
+    <p><strong>Date:</strong> ${formatDate(appointmentData.slotDate)}</p>
+    <p><strong>Time:</strong> ${formatTime(appointmentData.slotTime)}</p>
+    <p><strong>Duration:</strong> 30 minutes</p>
+    <h3>⚡ QUICK TECHNICAL CHECKLIST</h3>
+    <ul>
+      <li>Test your internet connection</li>
+      <li>Check camera and microphone</li>
+    </ul>
+    <h3>📝 JOINING INSTRUCTIONS</h3>
+    <ol>
+      <li>Click the join link above</li>
+      <li>Allow camera and microphone access</li>
+      <li>Enter your name if prompted</li>
+      <li>Doctor will admit you at appointment time</li>
+    </ol>
+    <h3>💡 FOR BEST EXPERIENCE</h3>
+    <ul>
+      <li>Join 5 minutes before scheduled time</li>
+      <li>Use Chrome or Firefox browser</li>
+      <li>Have medical documents ready</li>
+    </ul>
+    <h3>❗ NEED HELP?</h3>
+    <p>Having technical issues? Email: <a href="mailto:medilinkhealthcareservices190@gmail.com">medilinkhealthcareservices190@gmail.com</a></p>
+    <p>We're looking forward to your virtual consultation.</p>
+    <p>Best regards,<br>Team MediLink</p>
+    <p><em>Note: This is a secure link. Please do not share it with others.</em></p>
+  `;
 
   const mailOptions = {
     from: {
@@ -158,11 +192,12 @@ MediLink Healthcare Services | Privacy Policy | Terms of Service`;
       address: process.env.EMAIL_USER,
     },
     to: userData.email,
-    subject: `Your Video Consultation Link - Appointment with Dr. ${appointmentData.docData.name}`,
-    text: emailContent,
+    subject: `Your Video Consultation Link - Appointment with ${appointmentData.docData.name}`,
+    html: emailContent,
   };
 
   try {
+    console.log('Sending email to:', userData.email);
     await transporter.sendMail(mailOptions);
     console.log('Meet link email sent successfully');
     console.log('====================================');
@@ -170,8 +205,12 @@ MediLink Healthcare Services | Privacy Policy | Terms of Service`;
     console.log('Appointment ID:', appointmentData._id);
     console.log('====================================');
   } catch (error) {
-    console.error('Error sending Meet link email:', error);
-    throw error;
+    console.error('Error sending Meet link email:', {
+      message: error.message,
+      code: error.code,
+      response: error.response?.data,
+    });
+    throw new Error('Failed to send email. Please try again.');
   }
 };
 

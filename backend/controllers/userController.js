@@ -210,12 +210,6 @@ const bookAppointment = async (req, res) => {
     // Debug log
     console.log('New Appointment Data:', newAppointment);
 
-    // If it's a virtual appointment, create a Google Meet event
-    if (appointmentType === 'virtual') {
-      const meetLink = await createGoogleMeetEvent(newAppointment);
-      await sendMeetLinkEmail(userData, meetLink, newAppointment);
-    }
-
     // Send appointment confirmation email
     await sendAppointmentEmail(newAppointment);
 
@@ -298,156 +292,101 @@ const paymentRazorpay = async (req, res) => {
 };
 
 // API to verify Razorpay payment
+// API to verify Razorpay payment
 const verifyRazorpay = async (req, res) => {
-    try {
-      const { razorpay_order_id } = req.body;
-      const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
-  
-      if (orderInfo.status === 'paid') {
-        // Update appointment payment status
-        const appointmentId = orderInfo.receipt;
-        const appointmentData = await appointmentModel.findByIdAndUpdate(
-          appointmentId,
-          { payment: true },
-          { new: true }
-        ).populate('userData').populate('docData');
-  
-        // If it's a virtual appointment, create a Google Meet event and send an email
-        if (appointmentData.appointmentType === 'virtual') {
-          const meetLink = await createGoogleMeetEvent(appointmentData);
-          await sendMeetLinkEmail(appointmentData.userData, meetLink, appointmentData);
-  
-          // Update the appointment with the meeting link
-          await appointmentModel.findByIdAndUpdate(appointmentId, { meetLink });
-        }
-  
-        // Send payment confirmation email
-        await sendPaymentConfirmationEmail(appointmentData);
-  
-        res.json({ success: true, message: 'Payment Successful' });
-      } else {
-        res.json({ success: false, message: 'Payment Failed' });
+  try {
+    const { razorpay_order_id } = req.body;
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+
+    if (orderInfo.status === 'paid') {
+      // Update appointment payment status
+      const appointmentId = orderInfo.receipt;
+      const appointmentData = await appointmentModel.findByIdAndUpdate(
+        appointmentId,
+        { payment: true },
+        { new: true }
+      ).populate('userData').populate('docData');
+
+      // If it's a virtual appointment, create a Google Meet event and send an email
+      if (appointmentData.appointmentType === 'virtual') {
+        const meetLink = await createGoogleMeetEvent(appointmentData);
+        await sendMeetLinkEmail(appointmentData.userData, meetLink, appointmentData);
+
+        // Update the appointment with the meeting link
+        await appointmentModel.findByIdAndUpdate(appointmentId, { meetLink });
       }
-    } catch (error) {
-      console.log(error);
-      res.json({ success: false, message: error.message });
+
+      // Send payment confirmation email
+      await sendPaymentConfirmationEmail(appointmentData);
+
+      res.json({ success: true, message: 'Payment Successful' });
+    } else {
+      res.json({ success: false, message: 'Payment Failed' });
     }
-  };
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // Function to send appointment confirmation email
 const sendAppointmentEmail = async (appointmentData) => {
   const { userData, docData, slotDate, slotTime, appointmentType } = appointmentData;
 
-  const emailContent = `Dear ${userData.name},
-
-Thank you for choosing MediLink for your healthcare needs. Your appointment has been successfully scheduled and confirmed.
-
-🏥 APPOINTMENT DETAILS
-━━━━━━━━━━━━━━━━━━━━
-• Doctor: Dr. ${docData.name}
-• Specialization: ${formatSpecialization(docData.specialization)}
-• Date: ${formatDate(slotDate)}
-• Time: ${slotTime}
-• Type: ${appointmentType === 'virtual' ? 'Video Consultation' : 'In-Person Visit'}
-• Amount Paid: ₹${appointmentData.amount}
-
-${appointmentType === 'virtual' ? `
-🎥 VIDEO CONSULTATION PREPARATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Technical Setup (15 minutes before)
-   • Test your internet connection
-   • Check camera and microphone
-   • Ensure device is fully charged
-   • Find a quiet, well-lit space
-
-2. Meeting Access
-   • Video link will be sent 30 minutes before
-   • Join 5 minutes early
-   • Allow camera/microphone permissions
-   • Keep a backup device ready
-
-3. For Best Experience
-   • Use a stable internet connection
-   • Ensure good lighting on your face
-   • Minimize background noise
-   • Have a stable surface for your device` 
-: `
-📍 CLINIC LOCATION & DIRECTIONS
-━━━━━━━━━━━━━━━━━━━━━━━━━
-• Address: ${formatAddress(docData.address)}
-• Landmark: ${docData.landmark || 'Not specified'}
-
-⏰ ARRIVAL INSTRUCTIONS
-━━━━━━━━━━━━━━━━━━━━
-• Please arrive 15 minutes early
-• Follow clinic signage
-• Report to reception desk
-• Keep your appointment ID handy`}
-
-📋 WHAT TO BRING
-━━━━━━━━━━━━━━
-1. Medical Records
-   • Previous consultation reports
-   • Recent test results
-   • X-rays or scan reports
-   • List of current medications
-
-2. Personal Items
-   • Valid photo ID
-   • Insurance card (if applicable)
-   • Method of payment
-   • Water and light snacks if needed
-
-📝 PREPARATION GUIDELINES
-━━━━━━━━━━━━━━━━━━━━━━
-1. Medical Information
-   • List your current symptoms
-   • Note duration of symptoms
-   • Write down your questions
-   • Record any allergies
-
-2. Health Updates
-   • Recent health changes
-   • New medications
-   • Recent procedures
-   • Lifestyle changes
-
-❗ IMPORTANT POLICIES
-━━━━━━━━━━━━━━━━━
-• Cancellation: 24-hour notice required
-• Rescheduling: Use app or website
-• Late arrival: May require rescheduling
-• Follow-up: Book through the app
-
-📱 MEDILINK APP FEATURES
-━━━━━━━━━━━━━━━━━━━━
-• View appointment details
-• Access medical records
-• Chat with support team
-• Download prescriptions
-• Book follow-ups
-• Set reminders
-
-💁 NEED ASSISTANCE?
-━━━━━━━━━━━━━━━━
-• 📞 Phone: +91-XXXXXXXXXX
-• 📧 Email: support@medilink.com
-• 💬 Chat: Available in MediLink App
-• ⏰ Hours: Mon-Sat (9:00 AM - 6:00 PM)
-
-For emergencies after hours, please visit your nearest emergency room.
-
-We look forward to providing you with excellent healthcare service.
-
-Best regards,
-Team MediLink
-
-Note: This is an automated email. Please do not reply.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MediLink Healthcare Services
-Download our app: [App Store] | [Play Store]
-Follow us: [Facebook] | [Twitter] | [Instagram]
-Privacy Policy | Terms of Service | Contact Us`;
+  const emailContent = `
+    <p>Dear <strong>${userData.name}</strong>,</p>
+    <p>Thank you for choosing <strong>MediLink</strong> for your healthcare needs. Your appointment has been successfully scheduled and confirmed.</p>
+    <hr>
+    <h2>🏥 Appointment Details</h2>
+    <ul>
+      <li><strong>Doctor:</strong> ${docData.name}</li>
+      <li><strong>Specialization:</strong> ${formatSpecialization(docData.specialization)}</li>
+      <li><strong>Date:</strong> ${formatDate(slotDate)}</li>
+      <li><strong>Time:</strong> ${slotTime}</li>
+      <li><strong>Type:</strong> ${appointmentType === 'virtual' ? 'Video Consultation' : 'In-Person Visit'}</li>
+      <li><strong>Amount Paid:</strong> ₹${appointmentData.amount}</li>
+    </ul>
+    ${appointmentType === 'virtual' ? `
+      <h3>🎥 Video Consultation Preparation</h3>
+      <ul>
+        <li><strong>Technical Setup (15 minutes before):</strong></li>
+        <ul>
+          <li>✅ Test your internet connection</li>
+          <li>✅ Check camera and microphone</li>
+        </ul>
+        <li><strong>Meeting Access:</strong></li>
+        <ul>
+          <li>🔗 Video link will be sent after payment</li>
+          <li>⏳ Join 5 minutes early</li>
+        </ul>
+      </ul>
+    ` : `
+      <h3>📍 Clinic Location & Directions</h3>
+      <ul>
+        <li><strong>Address:</strong> ${formatAddress(docData.address)}</li>
+        <li><strong>Landmark:</strong> ${docData.landmark || 'Not specified'}</li>
+      </ul>
+      <h3>⏰ Arrival Instructions</h3>
+      <ul>
+        <li>🚪 Arrive 15 minutes early</li>
+        <li>🚸 Follow clinic signage</li>
+        <li>📑 Report to reception desk</li>
+        <li>🆔 Keep your appointment ID handy</li>
+      </ul>
+    `}
+    <h3>📋 What to Bring</h3>
+    <ul>
+      <li>📄 Previous consultation reports</li>
+      <li>🩺 Recent test results</li>
+      <li>🖼️ X-rays or scan reports</li>
+      <li>💊 List of current medications</li>
+    </ul>
+    <p>For further assistance, please contact us via email or chat through the MediLink app.</p>
+    <p>We look forward to serving you!</p>
+    <p><strong>Team MediLink</strong></p>
+    <hr>
+    <p style="font-size: 12px; color: gray;">This is an automated email. Please do not reply.</p>
+  `;
 
   const mailOptions = {
     from: {
@@ -455,22 +394,20 @@ Privacy Policy | Terms of Service | Contact Us`;
       address: process.env.EMAIL_USER,
     },
     to: userData.email,
-    subject: `Appointment Confirmed - Your ${appointmentType === 'virtual' ? 'Video Consultation' : 'Visit'} with Dr. ${docData.name}`,
-    text: emailContent,
+    subject: `Appointment Confirmed - Your ${appointmentType === 'virtual' ? 'Video Consultation' : 'Visit'} with ${docData.name}`,
+    html: emailContent, // Use the HTML format here
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Appointment confirmation email sent successfully');
-    console.log('====================================');
-    console.log('Email sent to:', userData.email);
-    console.log('Appointment ID:', appointmentData._id);
-    console.log('====================================');
+    console.log('✅ Appointment confirmation email sent successfully');
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error);
     throw error;
   }
 };
+
+
 
 export {
   registerUser,

@@ -1,11 +1,18 @@
 import { google } from 'googleapis';
 import readline from 'readline';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Manually define __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Debug: Check environment variables
+// Load .env file from the project root (backend/.env)
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+
+// Debug: Check if environment variables are loaded correctly
 console.log('Client ID:', process.env.GOOGLE_CLIENT_ID);
 console.log('Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
 console.log('Redirect URI:', process.env.GOOGLE_REDIRECT_URI);
@@ -48,3 +55,7 @@ rl.question('Enter the code from the authorization page: ', async (code) => {
     console.error('Error retrieving access token:', error);
   }
 });
+
+
+
+

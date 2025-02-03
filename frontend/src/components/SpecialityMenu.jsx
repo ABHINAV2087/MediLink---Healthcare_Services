@@ -8,14 +8,15 @@ const SpecialityMenu = () => {
       className="flex flex-col items-center gap-4 py-8 md:py-16 px-4 md:px-8 text-gray-800"
       id="speciality"
     >
-      <h1 className="text-2xl md:text-3xl font-medium text-center">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900  text-center">
         Find by Speciality
       </h1>
-
-      <p className="w-full md:w-2/3 lg:w-1/3 text-center text-sm md:text-base">
-        Simply browse through our extensive list of trusted doctors, schedule
+      <div className="w-16 sm:w-20 md:w-24 h-1 bg-blue-500 mx-auto mb-0 rounded-full"></div>
+      <p className="text-gray-600 text-sm sm:text-base md:text-lg text-center px-4 md:px-0">
+        Simply browse through our extensive list of trusted doctors and schedule
         your appointments
       </p>
+
 
       <div className="flex flex-row justify-start md:justify-center gap-4 md:gap-10 pt-5 w-full overflow-x-auto pb-4 md:pb-0">
         {specialityData.map((item, index) => (

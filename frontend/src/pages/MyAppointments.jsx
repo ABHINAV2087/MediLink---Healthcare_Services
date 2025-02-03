@@ -4,7 +4,18 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets_frontend/assets';
-import { Calendar, Clock, MapPin, AlertCircle, ChevronRight, User, CheckCircle2, Search, IndianRupee, Video } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  AlertCircle,
+  ChevronRight,
+  User,
+  CheckCircle2,
+  Search,
+  IndianRupee,
+  Video
+} from 'lucide-react';
 
 const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
@@ -243,8 +254,10 @@ const MyAppointments = () => {
                           <MapPin size={16} className="text-indigo-600" />
                         </div>
                         <span className="font-medium text-sm text-gray-700">
-                          {item.docData.address.line1}, {item.docData.address.line2}
+                          {item.docData?.address?.line1 || 'Address not available'}
+                          {item.docData?.address?.line2 ? `, ${item.docData.address.line2}` : ''}
                         </span>
+
                       </div>
 
                       <div className="grid sm:grid-cols-2 gap-2">
@@ -307,7 +320,7 @@ const MyAppointments = () => {
                           )}
 
                           {/* Join Meeting Button */}
-                          {item.appointmentType === 'virtual' && item.meetLink && (
+                          {item.appointmentType === 'virtual' && item.meetLink && item.payment && (
                             <a
                               href={item.meetLink}
                               target="_blank"
