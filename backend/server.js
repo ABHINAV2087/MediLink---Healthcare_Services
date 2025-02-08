@@ -21,7 +21,7 @@ const __dirname = path.dirname(__filename);
 // middleware
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://medilink-healthcare-services-backend.onrender.com'], // Array format for multiple origins
+    origin: ['http://localhost:5173', 'https://medilink-healthcareservices.vercel.app'], // Array format for multiple origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Ensure correct headers
     credentials: true
