@@ -80,7 +80,7 @@ export const createGoogleMeetEvent = async (appointmentData) => {
 
   const event = {
     summary: `Appointment with ${docData.name}`,
-    description: `Virtual appointment with Dr. ${docData.name} (${docData.speciality}).`,
+    description: `Virtual appointment with ${docData.name} (${docData.speciality}).`,
     start: {
       dateTime: startTime.toISOString(),
       timeZone: 'Asia/Kolkata', // Replace with the appropriate time zone

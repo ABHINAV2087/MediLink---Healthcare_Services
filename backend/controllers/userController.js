@@ -7,7 +7,17 @@ import jwt from 'jsonwebtoken';
 import { v2 as cloudinary } from 'cloudinary';
 import razorpay from 'razorpay';
 import nodemailer from 'nodemailer';
-import { createGoogleMeetEvent, sendMeetLinkEmail } from '../utils/googleCalendar.js';
+import path from 'path';
+import https from 'https';
+import fs from 'fs';
+import { createGoogleMeetEvent } from '../utils/googleCalendar.js';
+import { generateInvoice } from '../utils/invoiceService.js';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { OAuth2Client } from 'google-auth-library';
+
+
 
 // Configure Razorpay
 const razorpayInstance = new razorpay({
@@ -24,30 +34,139 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // Helper function to format date
 const formatDate = (dateString) => {
-  const [day, month, year] = dateString.split('_');
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  return `${day} ${months[parseInt(month) - 1]} ${year}`;
-};
-
-// Helper function to format address
-const formatAddress = (address) => {
-  if (!address) return 'Address not available';
-
-  const addressParts = [];
-  if (address.line1) addressParts.push(address.line1);
-  if (address.line2) addressParts.push(address.line2);
-
-  return addressParts.join(', ').trim() || 'Address not available';
+  try {
+    const [day, month, year] = dateString.split('_');
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `${day} ${months[parseInt(month) - 1]} ${year}`;
+  } catch (error) {
+    return dateString;
+  }
 };
 
 // Helper function to format specialization
 const formatSpecialization = (specialization) => {
-  return specialization ? specialization : 'General Physician';
+  return specialization || 'General Physician';
+};
+
+// Helper function to download invoice PDF
+const downloadInvoice = async (invoiceUrl, tempFilePath) => {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(tempFilePath);
+    
+    https.get(invoiceUrl, (response) => {
+      response.pipe(file);
+      
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+      
+      file.on('error', (err) => {
+        fs.unlink(tempFilePath, () => {});
+        reject(err);
+      });
+    }).on('error', (err) => {
+      fs.unlink(tempFilePath, () => {});
+      reject(err);
+    });
+  });
+};
+
+// Function to send payment confirmation email with invoice
+const sendPaymentConfirmationEmail = async (appointmentData, invoiceUrl) => {
+  const { userData, docData, slotDate, slotTime, appointmentType, amount, meetLink } = appointmentData;
+  
+  // Create temp directory if it doesn't exist
+  const tempDir = path.join(process.cwd(), 'temp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+  
+  // Generate temporary file path for invoice
+  const tempFilePath = path.join(tempDir, `invoice-${Date.now()}.pdf`);
+
+  try {
+    // Download invoice PDF
+    await downloadInvoice(invoiceUrl, tempFilePath);
+
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50; text-align: center;">Payment Confirmation</h2>
+        
+        <p>Dear <strong>${userData.name}</strong>,</p>
+        
+        <p>Your payment of ₹${amount} for the appointment with Dr. ${docData.name} has been successfully processed.</p>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="color: #2c3e50; margin-top: 0;">🏥 Appointment Details</h3>
+          <ul style="list-style: none; padding-left: 0;">
+            <li><strong>Doctor:</strong> ${docData.name}</li>
+            <li><strong>Specialization:</strong> ${formatSpecialization(docData.specialization)}</li>
+            <li><strong>Date:</strong> ${formatDate(slotDate)}</li>
+            <li><strong>Time:</strong> ${slotTime}</li>
+            <li><strong>Type:</strong> ${appointmentType === 'virtual' ? 'Video Consultation' : 'In-Person Visit'}</li>
+            <li><strong>Amount Paid:</strong> ₹${amount}</li>
+          </ul>
+        </div>
+        
+        ${appointmentType === 'virtual' && meetLink ? `
+          <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #2c3e50; margin-top: 0;">🎥 Video Consultation Link</h3>
+            <p>Join your consultation using this link: <a href="${meetLink}">${meetLink}</a></p>
+          </div>
+        ` : ''}
+        
+        <div style="margin-top: 30px;">
+          <p>Your invoice is attached to this email. Please keep it for your records.</p>
+          <p>For any queries, please contact our support team.</p>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; color: #7f8c8d;">
+          <p>Best regards,<br><strong>Team MediLink</strong></p>
+        </div>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: {
+        name: 'MediLink Healthcare',
+        address: process.env.EMAIL_USER
+      },
+      to: userData.email,
+      subject: 'Payment Confirmation - MediLink Healthcare',
+      html: emailContent,
+      attachments: [{
+        filename: 'invoice.pdf',
+        path: tempFilePath,
+        contentType: 'application/pdf'
+      }]
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Payment confirmation email sent successfully');
+
+  } catch (error) {
+    console.error('❌ Error sending payment confirmation email:', error);
+    throw error;
+  } finally {
+    // Clean up: Delete temporary file
+    try {
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+      }
+    } catch (error) {
+      console.error('Error cleaning up temporary file:', error);
+    }
+  }
 };
 
 // API to register user
@@ -210,9 +329,6 @@ const bookAppointment = async (req, res) => {
     // Debug log
     console.log('New Appointment Data:', newAppointment);
 
-    // Send appointment confirmation email
-    await sendAppointmentEmail(newAppointment);
-
     res.status(200).json({ success: true, message: 'Appointment Booked' });
   } catch (error) {
     console.error('Error booking appointment:', error);
@@ -292,122 +408,165 @@ const paymentRazorpay = async (req, res) => {
 };
 
 // API to verify Razorpay payment
-// API to verify Razorpay payment
+// Updated verifyRazorpay controller with proper invoice handling
 const verifyRazorpay = async (req, res) => {
   try {
-    const { razorpay_order_id } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    // Verify payment signature
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSign = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(sign.toString())
+      .digest("hex");
+
+    if (razorpay_signature !== expectedSign) {
+      return res.status(400).json({ success: false, message: "Invalid payment signature" });
+    }
+
+    // Fetch order details
     const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
 
     if (orderInfo.status === 'paid') {
-      // Update appointment payment status
       const appointmentId = orderInfo.receipt;
-      const appointmentData = await appointmentModel.findByIdAndUpdate(
-        appointmentId,
-        { payment: true },
-        { new: true }
-      ).populate('userData').populate('docData');
+      const appointment = await appointmentModel.findById(appointmentId)
+        .populate('userId', 'name email')
+        .populate('docId', 'name specialization fees');
 
-      // If it's a virtual appointment, create a Google Meet event and send an email
-      if (appointmentData.appointmentType === 'virtual') {
-        const meetLink = await createGoogleMeetEvent(appointmentData);
-        await sendMeetLinkEmail(appointmentData.userData, meetLink, appointmentData);
-
-        // Update the appointment with the meeting link
-        await appointmentModel.findByIdAndUpdate(appointmentId, { meetLink });
+      if (!appointment) {
+        return res.status(404).json({ success: false, message: 'Appointment not found' });
       }
 
-      // Send payment confirmation email
-      await sendPaymentConfirmationEmail(appointmentData);
+      // Generate invoice
+      let invoicePath;
+      try {
+        const invoiceFileName = `invoice-${appointmentId}.pdf`;
+        invoicePath = path.join(__dirname, '..', 'temp', invoiceFileName);
+        
+        // Generate PDF invoice
+        await generateInvoice(appointment, invoicePath);
+        
+        // Update appointment with invoice details
+        appointment.invoiceUrl = `/invoices/${invoiceFileName}`;
+        await appointment.save();
 
-      res.json({ success: true, message: 'Payment Successful' });
+      } catch (invoiceError) {
+        console.error('Invoice generation failed:', invoiceError);
+        return res.status(500).json({
+          success: false,
+          message: 'Payment successful but invoice generation failed',
+          appointmentId
+        });
+      }
+
+      // Create Google Meet link for virtual appointments
+      if (appointment.appointmentType === 'virtual') {
+        try {
+          const meetLink = await createGoogleMeetEvent(appointment);
+          appointment.meetLink = meetLink;
+          await appointment.save();
+        } catch (meetError) {
+          console.error('Google Meet creation failed:', meetError);
+        }
+      }
+
+      // Send confirmation email with invoice
+      try {
+        const emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2c3e50;">Payment Confirmation</h2>
+            <p>Dear ${appointment.userId.name},</p>
+            <p>Your payment of ₹${appointment.amount} for appointment with Dr. ${appointment.docId.name} was successful.</p>
+            <p>Appointment Date: ${formatDate(appointment.slotDate)}</p>
+            <p>Time: ${appointment.slotTime}</p>
+            ${appointment.meetLink ? `<p>Meeting Link: <a href="${appointment.meetLink}">Join Consultation</a></p>` : ''}
+            <p>Invoice is attached to this email.</p>
+          </div>
+        `;
+
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: appointment.userId.email,
+          subject: 'Appointment Confirmation',
+          html: emailContent,
+          attachments: [{
+            filename: `invoice-${appointmentId}.pdf`,
+            path: invoicePath,
+            contentType: 'application/pdf'
+          }]
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Confirmation email sent successfully');
+
+        // Clean up temporary file after sending email
+        fs.unlinkSync(invoicePath);
+
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Clean up temporary file if exists
+        if (fs.existsSync(invoicePath)) {
+          fs.unlinkSync(invoicePath);
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Payment successful',
+        data: {
+          appointmentId: appointment._id,
+          invoiceUrl: appointment.invoiceUrl,
+          meetLink: appointment.meetLink
+        }
+      });
+
     } else {
-      res.json({ success: false, message: 'Payment Failed' });
+      res.status(400).json({ success: false, message: 'Payment failed' });
     }
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error('Payment verification error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// Function to send appointment confirmation email
-const sendAppointmentEmail = async (appointmentData) => {
-  const { userData, docData, slotDate, slotTime, appointmentType } = appointmentData;
-
-  const emailContent = `
-    <p>Dear <strong>${userData.name}</strong>,</p>
-    <p>Thank you for choosing <strong>MediLink</strong> for your healthcare needs. Your appointment has been successfully scheduled and confirmed.</p>
-    <hr>
-    <h2>🏥 Appointment Details</h2>
-    <ul>
-      <li><strong>Doctor:</strong> ${docData.name}</li>
-      <li><strong>Specialization:</strong> ${formatSpecialization(docData.specialization)}</li>
-      <li><strong>Date:</strong> ${formatDate(slotDate)}</li>
-      <li><strong>Time:</strong> ${slotTime}</li>
-      <li><strong>Type:</strong> ${appointmentType === 'virtual' ? 'Video Consultation' : 'In-Person Visit'}</li>
-      <li><strong>Amount Paid:</strong> ₹${appointmentData.amount}</li>
-    </ul>
-    ${appointmentType === 'virtual' ? `
-      <h3>🎥 Video Consultation Preparation</h3>
-      <ul>
-        <li><strong>Technical Setup (15 minutes before):</strong></li>
-        <ul>
-          <li>✅ Test your internet connection</li>
-          <li>✅ Check camera and microphone</li>
-        </ul>
-        <li><strong>Meeting Access:</strong></li>
-        <ul>
-          <li>🔗 Video link will be sent after payment</li>
-          <li>⏳ Join 5 minutes early</li>
-        </ul>
-      </ul>
-    ` : `
-      <h3>📍 Clinic Location & Directions</h3>
-      <ul>
-        <li><strong>Address:</strong> ${formatAddress(docData.address)}</li>
-        <li><strong>Landmark:</strong> ${docData.landmark || 'Not specified'}</li>
-      </ul>
-      <h3>⏰ Arrival Instructions</h3>
-      <ul>
-        <li>🚪 Arrive 15 minutes early</li>
-        <li>🚸 Follow clinic signage</li>
-        <li>📑 Report to reception desk</li>
-        <li>🆔 Keep your appointment ID handy</li>
-      </ul>
-    `}
-    <h3>📋 What to Bring</h3>
-    <ul>
-      <li>📄 Previous consultation reports</li>
-      <li>🩺 Recent test results</li>
-      <li>🖼️ X-rays or scan reports</li>
-      <li>💊 List of current medications</li>
-    </ul>
-    <p>For further assistance, please contact us via email or chat through the MediLink app.</p>
-    <p>We look forward to serving you!</p>
-    <p><strong>Team MediLink</strong></p>
-    <hr>
-    <p style="font-size: 12px; color: gray;">This is an automated email. Please do not reply.</p>
-  `;
-
-  const mailOptions = {
-    from: {
-      name: 'MediLink Healthcare',
-      address: process.env.EMAIL_USER,
-    },
-    to: userData.email,
-    subject: `Appointment Confirmed - Your ${appointmentType === 'virtual' ? 'Video Consultation' : 'Visit'} with ${docData.name}`,
-    html: emailContent, // Use the HTML format here
-  };
-
+const googleAuth = async (req, res) => {
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Appointment confirmation email sent successfully');
+    const { token } = req.body;
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await userModel.findOne({ $or: [{ googleId }, { email }] });
+
+    if (!user) {
+      user = new userModel({
+        name,
+        email,
+        googleId,
+        isGoogleUser: true,
+        image: picture,
+        password: crypto.randomBytes(16).toString('hex') // dummy password
+      });
+      await user.save();
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      user.isGoogleUser = true;
+      await user.save();
+    }
+
+    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.status(200).json({ success: true, token: jwtToken });
   } catch (error) {
-    console.error('❌ Error sending email:', error);
-    throw error;
+    console.error('Google authentication error:', error);
+    res.status(500).json({ success: false, message: 'Google authentication failed' });
   }
 };
-
-
 
 export {
   registerUser,
@@ -419,4 +578,5 @@ export {
   cancelAppointment,
   paymentRazorpay,
   verifyRazorpay,
+  googleAuth
 };

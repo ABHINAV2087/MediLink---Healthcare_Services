@@ -13,29 +13,34 @@ import {
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import userImg from '../assets/assets_frontend/user-img.png';
 
 const ProfilePage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(null);
   const [tempUserData, setTempUserData] = useState(null);
+  const [imgError, setImgError] = useState(false);
 
   const { token, backendUrl, userData, setUserData, loadUserProfileData } =
     useContext(AppContext);
 
-  // Enter edit mode
+  const handleImageError = () => {
+    setImgError(true);
+  };
+
   const enterEditMode = () => {
     setTempUserData({ ...userData });
     setIsEdit(true);
+    setImgError(false);
   };
 
-  // Cancel edit and revert changes
   const cancelEdit = () => {
     setUserData(tempUserData);
     setIsEdit(false);
     setImage(null);
+    setImgError(false);
   };
 
-  // Update user profile data
   const updateUserProfileData = async () => {
     try {
       const formData = new FormData();
@@ -60,6 +65,7 @@ const ProfilePage = () => {
         await loadUserProfileData();
         setIsEdit(false);
         setImage(null);
+        setImgError(false);
       } else {
         toast.error(data.message);
       }
@@ -71,10 +77,19 @@ const ProfilePage = () => {
 
   if (!userData) return null;
 
+  const getDisplayImage = () => {
+    if (image) {
+      return URL.createObjectURL(image);
+    }
+    if (!imgError && userData?.image) {
+      return userData.image;
+    }
+    return userImg;
+  };
+
   return (
     <div className="min-h-screen py-2 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* Responsive Profile Header */}
         <div
           className="p-2 md:p-6"
           style={{
@@ -83,17 +98,15 @@ const ProfilePage = () => {
           }}
         >
           <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
-            {/* Profile Image */}
             <div className="relative group w-32 h-32 md:w-40 md:h-40">
               {isEdit ? (
                 <label className="cursor-pointer block w-full h-full">
                   <div className="relative w-full h-full">
                     <img
-                      src={
-                        image ? URL.createObjectURL(image) : userData.image
-                      }
+                      src={getDisplayImage()}
                       alt="Profile"
-                      className="w-full h-full rounded-full object-contain border-4 border-white shadow-md transition-all p-6"
+                      onError={handleImageError}
+                      className="w-full h-full rounded-full object-cover border-4 border-white shadow-md transition-all"
                     />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-50 rounded-full">
                       <Camera className="text-white w-12 h-12 md:w-16 md:h-16" />
@@ -102,21 +115,24 @@ const ProfilePage = () => {
                   <input
                     type="file"
                     className="hidden"
-                    onChange={(e) => setImage(e.target.files[0])}
+                    onChange={(e) => {
+                      setImage(e.target.files[0]);
+                      setImgError(false);
+                    }}
                     accept="image/*"
                   />
                 </label>
               ) : (
                 <img
-                  src={userData.image}
+                  src={getDisplayImage()}
                   alt="Profile"
+                  onError={handleImageError}
                   className="w-full h-full rounded-full object-cover border-4 border-white shadow-md"
                 />
               )}
             </div>
 
-            {/* Profile Name and Email */}
-            <div className="text-center md:text-left text-black ">
+            <div className="text-center md:text-left text-black">
               {isEdit ? (
                 <input
                   type="text"
@@ -124,7 +140,7 @@ const ProfilePage = () => {
                   onChange={(e) =>
                     setUserData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="text-2xl md:text-4xl font-bold bg-transparent border-b-2 border-grey focus:outline-none text-black  w-full text-center md:text-left capitalize"
+                  className="text-2xl md:text-4xl font-bold bg-transparent border-b-2 border-grey focus:outline-none text-black w-full text-center md:text-left capitalize"
                 />
               ) : (
                 <h2 className="text-2xl md:text-4xl font-bold capitalize -mt-2">
@@ -138,14 +154,12 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Profile Details */}
         <div className="p-6 md:p-8 space-y-8">
-          {/* Contact Information */}
           <div>
             <h3 className="text-lg md:text-2xl font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 mb-4 text-center">
               Contact Information
             </h3>
-            <div className="space-y-6 ">
+            <div className="space-y-6">
               <ProfileField
                 icon={<Mail className="text-indigo-500 w-5 h-5" />}
                 label="Email"
@@ -182,7 +196,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Personal Details */}
           <div>
             <h3 className="text-lg md:text-2xl font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 mb-4 text-center">
               Personal Details
@@ -233,7 +246,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="p-6 md:p-8 border-t border-gray-200 flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
           {isEdit ? (
             <>
@@ -264,7 +276,6 @@ const ProfilePage = () => {
   );
 };
 
-// Reusable Profile Field Component
 const ProfileField = ({
   icon,
   label,
