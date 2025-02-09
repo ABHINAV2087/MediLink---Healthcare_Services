@@ -35,11 +35,27 @@ const MyAppointments = () => {
   const getUserAppointments = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(backendUrl + '/api/user/appointments', { headers: { token } });
-      setAppointments(data.appointments.reverse());
+      const { data } = await axios.get(
+        backendUrl + '/api/user/appointments',
+        { headers: { token } }
+      );
+      
+      if (data.success && Array.isArray(data.appointments)) {
+        const sortedAppointments = data.appointments
+          .map(apt => ({
+            ...apt,
+            payment: Boolean(apt.payment), // Ensure payment is boolean
+            meetLink: apt.meetLink || null
+          }))
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        setAppointments(sortedAppointments);
+      } else {
+        toast.error('Failed to fetch appointments');
+      }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error('Error fetching appointments:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch appointments');
     } finally {
       setLoading(false);
     }
@@ -76,21 +92,50 @@ const MyAppointments = () => {
       receipt: order.receipt,
       handler: async (response) => {
         try {
+          setLoading(true); // Show loading state
+          
           const { data } = await axios.post(
             backendUrl + "/api/user/verifyRazorpay",
             response,
             { headers: { token } }
           );
+          
           if (data.success) {
-            navigate('/my-appointments');
-            getUserAppointments();
+            // Update the specific appointment in state with all the new data
+            setAppointments(prevAppointments => 
+              prevAppointments.map(appointment => {
+                if (appointment._id === order.receipt) {
+                  return {
+                    ...appointment,
+                    ...data.data.appointment,
+                    payment: true,
+                    meetLink: data.data.meetLink
+                  };
+                }
+                return appointment;
+              })
+            );
+            
+            toast.success('Payment successful!');
+            setPayment('');
           }
         } catch (error) {
-          console.log(error);
-          toast.error(error.message);
+          console.error('Payment verification error:', error);
+          toast.error(error.response?.data?.message || 'Payment verification failed');
+        } finally {
+          setLoading(false);
+          // Fetch fresh data after everything is done
+          getUserAppointments();
+        }
+      },
+      modal: {
+        ondismiss: function() {
+          setPayment('');
+          getUserAppointments(); // Refresh appointments when modal is dismissed
         }
       }
     };
+    
     const rzp = new window.Razorpay(options);
     rzp.open();
   };
