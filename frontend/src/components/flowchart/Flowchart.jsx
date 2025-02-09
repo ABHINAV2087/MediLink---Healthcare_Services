@@ -70,6 +70,7 @@ const Flowchart = () => {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
           Teleconsultation Process Flow
         </h2>
+        <div className="w-16 sm:w-20 md:w-24 h-1 bg-blue-500 mx-auto mb-4 rounded-full"></div>
         <p className="text-gray-600 text-sm sm:text-base md:text-lg text-center px-4 md:px-0">
           Follow these steps to complete your teleconsultation
         </p>
