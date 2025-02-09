@@ -3,6 +3,7 @@ import { assets } from '../assets/assets_frontend/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext';
 import userImg from '../assets/assets_frontend/user-img.png';
+import { UserCircle2 } from 'lucide-react';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -58,7 +59,7 @@ const Navbar = () => {
                             alt="User"
                         />
                         <img 
-                            className='w-2.5' 
+                            className='w-2.5 hidden md:block' 
                             src={assets.dropdown_icon} 
                             alt="" 
                         />
@@ -77,12 +78,20 @@ const Navbar = () => {
                         </div>
                     </div>
                 ) : (
-                    <button 
-                        onClick={() => navigate('/login')} 
-                        className='bg-primary text-white px-8 py-3 rounded-full font-light hidden md:block'
-                    >
-                        Create account
-                    </button>
+                    <>
+                        {/* Desktop view button */}
+                        <button 
+                            onClick={() => navigate('/login')} 
+                            className='bg-primary text-white px-6 py-2 text-sm rounded-full font-medium hidden md:block hover:bg-opacity-90 transition-all'
+                        >
+                            Sign in / Sign up
+                        </button>
+                        {/* Mobile view icon */}
+                        <UserCircle2 
+                            onClick={() => navigate('/login')}
+                            className="w-7 h-7 text-primary cursor-pointer md:hidden" 
+                        />
+                    </>
                 )}
 
                 <img 
@@ -120,6 +129,13 @@ const Navbar = () => {
                         <NavLink onClick={() => setShowMenu(false)} to='/contact'>
                             <p className='px-4 py-2 rounded inline-block'>CONTACT</p>
                         </NavLink>
+                        {!token && (
+                            <NavLink onClick={() => setShowMenu(false)} to='/login'>
+                                <button className='bg-primary text-white px-6 py-2 text-sm rounded-full font-medium mt-4 hover:bg-opacity-90 transition-all w-full'>
+                                    Sign in / Sign up
+                                </button>
+                            </NavLink>
+                        )}
                     </ul>
                 </div>
             </div>
