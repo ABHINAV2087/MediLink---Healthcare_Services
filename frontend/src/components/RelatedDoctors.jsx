@@ -37,13 +37,7 @@ const RelatedDoctors = ({ speciality, docId }) => {
             }}
             className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-100"
           >
-            <div className="aspect-w-16 aspect-h-12 bg-gray-100">
-              <img
-                className="w-full h-full object-cover"
-                src={item.image}
-                alt={item.name}
-              />
-            </div>
+            
             
             <div className="p-4">
               <div className="flex items-center gap-2 mb-2">
