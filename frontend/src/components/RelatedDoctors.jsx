@@ -42,13 +42,13 @@ const RelatedDoctors = ({ speciality, docId }) => {
             }}
             className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 cursor-pointer transform hover:-translate-y-1"
           >
-            <div className="h-48 bg-gray-100 relative overflow-hidden">
-              <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-medium text-blue-600 shadow-sm">
-                4.9 <Star className="w-4 h-4 inline-block ml-1 text-yellow-400" />
-              </div>
-            </div>
-            
             <div className="p-6">
+              <div className="flex justify-end mb-4">
+                <span className="bg-white px-3 py-1 rounded-full text-sm font-medium text-blue-600 shadow-sm">
+                  4.9 <Star className="w-4 h-4 inline-block ml-1 text-yellow-400" />
+                </span>
+              </div>
+              
               <div className="flex items-center gap-2 mb-3">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
