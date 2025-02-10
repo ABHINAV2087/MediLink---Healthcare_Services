@@ -214,93 +214,43 @@ const Appointment = () => {
                     </div>
 
                     {/* Appointment Booking Section */}
-                    <div className="mt-4 sm:mt-8 grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                        {/* Updated Appointment Type Selection */}
-                        <div className="bg-white p-2 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg">
-                            <h2 className="text-base sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-6">Select Appointment Type</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-                                <button
-                                    onClick={() => setAppointmentType("virtual")}
-                                    className={`p-1.5 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "virtual"
-                                            ? "border-blue-600 bg-blue-50"
-                                            : "border-gray-200 hover:border-blue-300"
-                                        }`}
-                                >
-                                    <Video className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-400"
-                                        }`} />
-                                    <div className={`text-xs sm:text-sm font-medium ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-600"
-                                        }`}>
-                                        Virtual Meeting
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-0.5">
-                                        {currencySymbol}{docInfo.fees}
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => setAppointmentType("in-person")}
-                                    className={`p-1.5 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "in-person"
-                                            ? "border-blue-600 bg-blue-50"
-                                            : "border-gray-200 hover:border-blue-300"
-                                        }`}
-                                >
-                                    <MapPin className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-400"
-                                        }`} />
-                                    <div className={`text-xs sm:text-sm font-medium ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-600"
-                                        }`}>
-                                        In-Person Visit
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-0.5">
-                                        {currencySymbol}{docInfo.fees}
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Date & Time Selection */}
-                        <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
-                            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6">Select Date & Time</h2>
-                            <div className="space-y-4 sm:space-y-6">
-                                {/* Date Selection - Horizontal Scrollable */}
-                                <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-                                    {docSlots.length > 0 &&
-                                        docSlots.map((item, index) => (
-                                            <button
-                                                onClick={() => setSlotIndex(index)}
-                                                key={index}
-                                                className={`flex-shrink-0 p-2 sm:p-3 lg:p-4 rounded-xl transition-all ${slotIndex === index
-                                                        ? "bg-blue-600 text-white"
-                                                        : "bg-gray-50 hover:bg-gray-100"
-                                                    }`}
-                                            >
-                                                <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                                                    {item[0] && daysOfWeek[item[0].datetime.getDay()]}
-                                                </div>
-                                                <div className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">
-                                                    {item[0] && item[0].datetime.getDate()}
-                                                </div>
-                                            </button>
-                                        ))}
+                    <div className="bg-white p-2 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg w-full">
+                        <h2 className="text-base sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-6">Select Appointment Type</h2>
+                        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                            <button
+                                onClick={() => setAppointmentType("virtual")}
+                                className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "virtual"
+                                        ? "border-blue-600 bg-blue-50"
+                                        : "border-gray-200 hover:border-blue-300"
+                                    }`}
+                            >
+                                <Video className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-400"
+                                    }`} />
+                                <div className={`text-[10px] sm:text-sm font-medium ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-600"
+                                    }`}>
+                                    Virtual Meeting
                                 </div>
-
-                                {/* Time Selection Grid */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                                    {docSlots.length > 0 &&
-                                        docSlots[slotIndex].map((item, index) => (
-                                            <button
-                                                onClick={() => setSlotTime(item.time)}
-                                                key={index}
-                                                className={`p-2 sm:p-3 rounded-lg text-center transition-all ${item.time === slotTime
-                                                        ? "bg-blue-600 text-white"
-                                                        : "bg-gray-50 hover:bg-gray-100 text-gray-600"
-                                                    }`}
-                                            >
-                                                <span className="text-sm whitespace-nowrap">
-                                                    {item.displayTime.toLowerCase()}
-                                                </span>
-                                            </button>
-                                        ))}
+                                <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
+                                    {currencySymbol}{docInfo.fees}
                                 </div>
-                            </div>
+                            </button>
+                            <button
+                                onClick={() => setAppointmentType("in-person")}
+                                className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "in-person"
+                                        ? "border-blue-600 bg-blue-50"
+                                        : "border-gray-200 hover:border-blue-300"
+                                    }`}
+                            >
+                                <MapPin className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-400"
+                                    }`} />
+                                <div className={`text-[10px] sm:text-sm font-medium ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-600"
+                                    }`}>
+                                    In-Person Visit
+                                </div>
+                                <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
+                                    {currencySymbol}{docInfo.fees}
+                                </div>
+                            </button>
                         </div>
                     </div>
 
