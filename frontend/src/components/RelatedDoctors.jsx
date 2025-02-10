@@ -22,6 +22,7 @@ const RelatedDoctors = ({ speciality, docId }) => {
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3">
           Top Doctors to Book
         </h1>
+        <div className="w-16 sm:w-20 md:w-24 h-1 bg-blue-500 mx-auto mb-3 sm:mb-4 rounded-full"></div>
         <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
           Simply browse through our extensive list of trusted doctors.
         </p>
