@@ -1,66 +1,80 @@
-import React, { useContext, useState, useEffect } from 'react'
-import { AppContext } from '../context/AppContext'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext, useState, useEffect } from 'react';
+import { AppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
-const RelatedDoctors = ({speciality, docId}) => {
-    const {doctors} = useContext(AppContext)
-    const [relDocs, setRelDocs] = useState([])
-    const navigate = useNavigate()
+const RelatedDoctors = ({ speciality, docId }) => {
+  const { doctors } = useContext(AppContext);
+  const [relDocs, setRelDocs] = useState([]);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-      if(doctors.length > 0 && speciality){
-        const doctorsData = doctors.filter((doc) => doc.speciality === speciality && doc._id !== docId)
-        setRelDocs(doctorsData)
-      }
-    }, [doctors, speciality, docId])
-    
-    return (
-        <div className="flex flex-col items-center gap-2 sm:gap-4 my-8 sm:my-16 text-gray-900 md:mx-10">
-            <h1 className="text-2xl sm:text-3xl font-medium">Top Doctors to Book</h1>
-            <p className="sm:w-1/3 text-center text-xs sm:text-sm px-4 sm:px-0">
-                Simply browse through our extensive list of trusted doctors.
-            </p>
-            <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 pt-3 sm:pt-5 gap-y-3 sm:gap-y-6 px-2 sm:px-0">
-                {relDocs.slice(0, 5).map((item, index) => (
-                    <div
-                        onClick={() => {
-                            navigate(`/appointment/${item._id}`);
-                            scrollTo(0, 0);
-                        }}
-                        className="border border-blue-200 rounded-lg sm:rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-5px] sm:hover:translate-y-[-10px] transition-all duration-500"
-                        key={index}
-                    >
-                        <img 
-                            className="w-full h-24 sm:h-32 md:h-40 object-cover bg-blue-50" 
-                            src={item.image} 
-                            alt={item.name} 
-                        />
-                        <div className="p-2 sm:p-4">
-                            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-green-500">
-                                <p className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></p>
-                                <p>Available</p>
-                            </div>
-                            <p className="text-gray-900 text-sm sm:text-lg font-medium mt-0.5 sm:mt-1 truncate">
-                                {item.name}
-                            </p>
-                            <p className="text-gray-600 text-xs sm:text-sm truncate">
-                                {item.speciality}
-                            </p>
-                        </div>
-                    </div>
-                ))}
+  useEffect(() => {
+    if (doctors.length > 0 && speciality) {
+      const doctorsData = doctors.filter(
+        (doc) => doc.speciality === speciality && doc._id !== docId
+      );
+      setRelDocs(doctorsData);
+    }
+  }, [doctors, speciality, docId]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3">
+          Top Doctors to Book
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
+          Simply browse through our extensive list of trusted doctors.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {relDocs.slice(0, 5).map((item, index) => (
+          <div
+            key={index}
+            onClick={() => {
+              navigate(`/appointment/${item._id}`);
+              scrollTo(0, 0);
+            }}
+            className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-100"
+          >
+            <div className="aspect-w-16 aspect-h-12 bg-gray-100">
+              <img
+                className="w-full h-full object-cover"
+                src={item.image}
+                alt={item.name}
+              />
             </div>
-            <button
-                onClick={() => {
-                    navigate("/doctors");
-                    scrollTo(0, 0);
-                }}
-                className="text-gray-600 px-8 sm:px-12 py-2 sm:py-3 rounded-full mt-6 sm:mt-10 bg-cyan-200 text-sm sm:text-base"
-            >
-                More
-            </button>
-        </div>
-    )
-}
+            
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span className="text-sm text-green-600 font-medium">Available</span>
+              </div>
+              
+              <h3 className="text-lg font-medium text-gray-900 mb-1 truncate">
+                {item.name}
+              </h3>
+              <p className="text-sm text-gray-600 truncate">
+                {item.speciality}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-export default RelatedDoctors
+      <div className="text-center mt-8 sm:mt-12">
+        <button
+          onClick={() => {
+            navigate("/doctors");
+            scrollTo(0, 0);
+          }}
+          className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-300"
+        >
+          View More Doctors
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default RelatedDoctors;
