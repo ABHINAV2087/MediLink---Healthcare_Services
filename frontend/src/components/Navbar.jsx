@@ -25,7 +25,7 @@ const Navbar = () => {
         <div className='flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400'>
             <img 
                 onClick={() => navigate('/')} 
-                className='w-44 cursor-pointer' 
+                className='w-32 md:w-44 cursor-pointer' 
                 src={assets.logo} 
                 alt="" 
             />
@@ -105,7 +105,7 @@ const Navbar = () => {
                 <div className={`${showMenu ? 'fixed w-full' : 'h-0 w-0'} md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all`}>
                     <div className='flex items-center justify-between px-5 py-6'>
                         <img 
-                            className='w-36' 
+                            className='w-32' 
                             src={assets.logo} 
                             alt="" 
                         />

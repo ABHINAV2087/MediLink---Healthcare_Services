@@ -214,49 +214,49 @@ const Appointment = () => {
                     </div>
 
                     {/* Appointment Booking Section */}
-                    <div className="mt-6 sm:mt-8 grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                        {/* Appointment Type Selection */}
-                        <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
-                            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6">Select Appointment Type</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="mt-4 sm:mt-8 grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                        {/* Updated Appointment Type Selection */}
+                        <div className="bg-white p-3 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
+                            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-6">Select Appointment Type</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                                 <button
                                     onClick={() => setAppointmentType("virtual")}
-                                    className={`p-3 sm:p-4 lg:p-6 rounded-xl border-2 transition-all ${
+                                    className={`p-2 sm:p-4 rounded-xl border-2 transition-all ${
                                         appointmentType === "virtual"
                                             ? "border-blue-600 bg-blue-50"
                                             : "border-gray-200 hover:border-blue-300"
                                     }`}
                                 >
-                                    <Video className={`w-6 h-6 sm:w-8 sm:h-8 mb-2 sm:mb-3 mx-auto ${
+                                    <Video className={`w-5 h-5 sm:w-6 sm:h-6 mb-1.5 sm:mb-2 mx-auto ${
                                         appointmentType === "virtual" ? "text-blue-600" : "text-gray-400"
                                     }`} />
-                                    <div className={`text-sm font-medium ${
+                                    <div className={`text-xs sm:text-sm font-medium ${
                                         appointmentType === "virtual" ? "text-blue-600" : "text-gray-600"
                                     }`}>
                                         Virtual Meeting
                                     </div>
-                                    <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    <div className="text-xs text-gray-500 mt-0.5">
                                         {currencySymbol}{docInfo.fees}
                                     </div>
                                 </button>
 
                                 <button
                                     onClick={() => setAppointmentType("in-person")}
-                                    className={`p-3 sm:p-4 lg:p-6 rounded-xl border-2 transition-all ${
+                                    className={`p-2 sm:p-4 rounded-xl border-2 transition-all ${
                                         appointmentType === "in-person"
                                             ? "border-blue-600 bg-blue-50"
                                             : "border-gray-200 hover:border-blue-300"
                                     }`}
                                 >
-                                    <MapPin className={`w-6 h-6 sm:w-8 sm:h-8 mb-2 sm:mb-3 mx-auto ${
+                                    <MapPin className={`w-5 h-5 sm:w-6 sm:h-6 mb-1.5 sm:mb-2 mx-auto ${
                                         appointmentType === "in-person" ? "text-blue-600" : "text-gray-400"
                                     }`} />
-                                    <div className={`text-sm font-medium ${
+                                    <div className={`text-xs sm:text-sm font-medium ${
                                         appointmentType === "in-person" ? "text-blue-600" : "text-gray-600"
                                     }`}>
                                         In-Person Visit
                                     </div>
-                                    <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    <div className="text-xs text-gray-500 mt-0.5">
                                         {currencySymbol}{docInfo.fees}
                                     </div>
                                 </button>
