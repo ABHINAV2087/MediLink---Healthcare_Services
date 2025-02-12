@@ -1,6 +1,6 @@
 import express from 'express';
-import cors from 'cors';
 import "dotenv/config";
+import cors from 'cors';
 import connectDB from './config/mongodb.js';
 import connectCloudinary from './config/cloudinary.js';
 import adminRouter from './routes/adminRoute.js';
@@ -9,7 +9,7 @@ import userRouter from './routes/userRoute.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// App config
+// App Config
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
@@ -20,33 +20,44 @@ const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
+
+// CORS Configuration
 const allowedOrigins = [
     process.env.FRONTEND_USER_URL || "http://localhost:5173",
     process.env.FRONTEND_ADMIN_URL || "http://localhost:5174"
 ];
 
-app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'adminToken'],
-    credentials: true
-}));
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, token, adminToken, admintoken");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
 
+    // Handle preflight requests (OPTIONS)
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
 
+    next();
+});
 
+// Debugging Middleware (Optional, for Logging)
+app.use((req, res, next) => {
+    console.log("Incoming Request Headers:", req.headers);
+    next();
+});
+
+// Security Headers
 app.use((req, res, next) => {
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
     next();
 });
 
-// API endpoints
+// API Routes
 app.use('/api/admin', adminRouter);
 app.use('/api/doctor', doctorRouter);
 app.use('/api/user', userRouter);
@@ -55,7 +66,7 @@ app.get('/', (req, res) => {
     res.send('API WORKING');
 });
 
-// Bind to all network interfaces
+// Start Server
 app.listen(port)
     .on('error', (err) => {
         console.error('Failed to start server:', err);
@@ -63,4 +74,3 @@ app.listen(port)
     .on('listening', () => {
         console.log(`Server running on port ${port}`);
     });
-
