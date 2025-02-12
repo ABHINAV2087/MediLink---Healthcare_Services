@@ -29,82 +29,45 @@ const __dirname = path.dirname(__filename);
 
 // Middleware for parsing JSON
 app.use(express.json());
-app.use(express.urlencoded({ extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 // CORS Configuration
 const allowedOrigins = [
     process.env.FRONTEND_USER_URL || "http://localhost:5173",
     process.env.FRONTEND_ADMIN_URL || "http://localhost:5174",
     "https://medilink-healthcareservices-admin.vercel.app",
-    "https://medilink-healthcareservices.vercel.app", // Add your user frontend URL if different
+    "https://medilink-healthcareservices.vercel.app",
 ];
 
-// CORS error handling middleware
-app.use((err, req, res, next) => {
-    if (err.message === 'Not allowed by CORS') {
-        res.status(403).json({
-            error: 'CORS Error',
-            message: 'Origin not allowed',
-            origin: req.headers.origin
-        });
-    } else {
-        next(err);
-    }
-});
-
-// Main CORS configuration
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) {
-            console.log('Request with no origin');
-            return callback(null, true);
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
         }
-
-        if (allowedOrigins.indexOf(origin) === -1) {
-            console.log('Origin blocked:', origin);
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-
-        console.log('Origin allowed:', origin);
-        return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'token',
-        'admintoken',
-        'X-Requested-With',
-        'Accept'
-    ],
+    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'admintoken', 'X-Requested-With', 'Accept'],
     credentials: true,
     maxAge: 86400 // 24 hours
-}));
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Additional headers middleware
 app.use((req, res, next) => {
-    console.log('Incoming request from origin:', req.headers.origin);
     const origin = req.headers.origin;
-    
     if (allowedOrigins.includes(origin)) {
-        console.log('Setting CORS headers for origin:', origin);
         res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, admintoken, X-Requested-With, Accept');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-    } else {
-        console.log('Origin not in allowed list:', origin);
     }
-
-    // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-        console.log('Handling OPTIONS preflight request');
-        res.sendStatus(200);
-        return;
-    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, admintoken, X-Requested-With, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
     next();
 });
 
