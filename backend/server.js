@@ -20,11 +20,26 @@ const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
+
+// Updated CORS configuration
 app.use(cors({
-    origin: process.env.FRONTEND_USER_URL || process.env.FRONTEND_ADMIN_URL || '*', // Preferably set specific allowed origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token','adminToken','admintoken'],
-    credentials: true
+    origin: [
+        process.env.FRONTEND_USER_URL,
+        process.env.FRONTEND_ADMIN_URL,
+        'https://medilink-healthcareservices-admin.vercel.app'  // Add your specific frontend URL
+    ].filter(Boolean),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Added OPTIONS method
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'token',
+        'adminToken',
+        'admintoken',
+        'Admintoken'  // Added both cases to handle case sensitivity
+    ],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 
 app.use((req, res, next) => {
