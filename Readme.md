@@ -88,8 +88,8 @@
 
 ## Deployment
 
-- **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app)**
-- **[Medilink Admin/Doctor Panel](https://medilink-healthcareservices-admin.vercel.app/)**
+- **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app/)**
+- **[Medilink Admin/Doctor Panel](https://medilink-adminpanel.vercel.app/)**
 
 ## Contributing
 
