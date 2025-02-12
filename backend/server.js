@@ -53,6 +53,7 @@ const corsOptions = {
     maxAge: 86400 // 24 hours
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Handle preflight requests
