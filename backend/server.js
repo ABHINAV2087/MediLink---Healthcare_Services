@@ -18,24 +18,23 @@ connectCloudinary();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Define the allowed origins
+
+// Middleware
+app.use(express.json());
+
+
+
 const allowedOrigins = [
     process.env.FRONTEND_USER_URL || "http://localhost:5173",
     process.env.FRONTEND_ADMIN_URL || "http://localhost:5174"
 ];
 
-// Middleware
-app.use(express.json());
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        // Check if the origin is in the allowed list
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
         } else {
-            return callback(new Error('Not allowed by CORS'));
+            callback(new Error('Not allowed by CORS'));
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -43,7 +42,6 @@ app.use(cors({
     credentials: true
 }));
 
-// Additional CORS handling
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
@@ -53,17 +51,10 @@ app.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
 
-    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         res.sendStatus(200);
         return;
     }
-    next();
-});
-
-app.use((req, res, next) => {
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
     next();
 });
 
