@@ -8,14 +8,18 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "server.js",
+      "src": "/api/(.*)",
       "headers": {
-        "Access-Control-Allow-Origin": "https://medilink-healthcareservices-admin.vercel.app",
+        "Access-Control-Allow-Origin": "https://medilink-healthcareservices-admin.vercel.app, https://medilink-healthcareservices.vercel.app",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization, token, adminToken, admintoken, Admintoken",
         "Access-Control-Allow-Credentials": "true"
-      }
+      },
+      "continue": true
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
     }
   ]
 }
