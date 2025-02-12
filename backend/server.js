@@ -27,8 +27,8 @@ app.use(express.json());
 const allowedOrigins = [
     'https://medilink-healthcareservices-admin.vercel.app',
     'https://medilink-healthcareservices.vercel.app',
-    process.env.FRONTEND_USER_URL,
-    'http://localhost:5174'
+    
+    
 ].filter(Boolean);
 
 // Configure CORS middleware
