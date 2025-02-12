@@ -20,8 +20,8 @@ const __dirname = path.dirname(__filename);
 
 // Define the allowed origins
 const allowedOrigins = [
-    process.env.FRONTEND_URL_1, // First frontend URL
-    process.env.FRONTEND_URL_2  // Second frontend URL
+    process.env.FRONTEND_USER_URL || "http://localhost:5173",
+    process.env.FRONTEND_ADMIN_URL || "http://localhost:5174"
 ];
 
 // Middleware
@@ -39,7 +39,7 @@ app.use(cors({
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token','admintoken'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'admintoken'],
     credentials: true
 }));
 
