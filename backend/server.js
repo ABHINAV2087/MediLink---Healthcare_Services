@@ -26,31 +26,14 @@ app.use(express.json());
 // CORS Configuration
 const allowedOrigins = [
     process.env.FRONTEND_USER_URL,
-    process.env.FRONTEND_ADMIN_URL,
+    'http://localhost:5174',
     'https://medilink-healthcareservices-admin.vercel.app'
 ].filter(Boolean);
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (e.g., mobile apps, curl requests)
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        } else {
-            const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
-            return callback(new Error(msg), false);
-        }
-    },
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'token',
-        'adminToken',
-        'admintoken',
-        'Admintoken'
-    ],
+    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'adminToken', 'admintoken', 'Admintoken'],
     credentials: true,
     preflightContinue: false,
     optionsSuccessStatus: 204
