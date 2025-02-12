@@ -45,7 +45,7 @@ app.use(cors({
         'Authorization', 
         'token', 
         'adminToken', 
-        'admintoken', 
+        'admintoken',  // Ensure this is included
         'AdminToken',
         'x-requested-with'
     ],
