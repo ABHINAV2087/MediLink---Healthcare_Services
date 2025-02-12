@@ -34,7 +34,7 @@ const AdminContextProvider = (props) => {
 
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/admin/all-doctors', { headers: { adminToken } })
+            const { data } = await axios.get(backendUrl + '/api/admin/all-doctors', { headers: { admintoken: adminToken }  })
             if (data.success) {
                 setDoctors(data.doctors)
             } else {
@@ -51,7 +51,7 @@ const AdminContextProvider = (props) => {
     const changeAvailability = async (docId) => {
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { adminToken } })
+            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { admintoken: adminToken }  })
             if (data.success) {
                 toast.success(data.message)
                 getAllDoctors()
@@ -70,7 +70,7 @@ const AdminContextProvider = (props) => {
 
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/admin/appointments', { headers: { adminToken } })
+            const { data } = await axios.get(backendUrl + '/api/admin/appointments', { headers: { admintoken: adminToken }  })
             if (data.success) {
                 setAppointments(data.appointments.reverse())
             } else {
@@ -88,7 +88,7 @@ const cancelAppointment = async (appointmentId) => {
 
     try {
 
-        const { data } = await axios.post(backendUrl + '/api/admin/cancel-appointment', { appointmentId }, { headers: { adminToken } })
+        const { data } = await axios.post(backendUrl + '/api/admin/cancel-appointment', { appointmentId }, { headers: { admintoken: adminToken } })
 
         if (data.success) {
             toast.success(data.message)
@@ -108,7 +108,7 @@ const cancelAppointment = async (appointmentId) => {
     const getDashData = async () => {
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/admin/dashboard', { headers: { adminToken } })
+            const { data } = await axios.get(backendUrl + '/api/admin/dashboard', { headers: { admintoken: adminToken }  })
 
             if (data.success) {
                 setDashData(data.dashData)
