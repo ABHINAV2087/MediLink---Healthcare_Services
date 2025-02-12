@@ -30,34 +30,33 @@ const allowedOrigins = [
     'https://medilink-healthcareservices-admin.vercel.app'
 ].filter(Boolean);
 
+// Configure CORS middleware
 app.use(cors({
-    origin: allowedOrigins,
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'token', 'adminToken', 'admintoken', 'Admintoken'],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    maxAge: 86400 // 24 hours
 }));
 
-// Handle preflight requests
-app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Allow all origins for preflight
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, adminToken, admintoken, Admintoken');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(204).send(); // No content for preflight
-});
-
-// Set additional headers for cross-origin requests
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin);
+// Global error handler for CORS errors
+app.use((err, req, res, next) => {
+    if (err.message === 'Not allowed by CORS') {
+        return res.status(403).json({
+            success: false,
+            message: 'CORS: Not allowed'
+        });
     }
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, adminToken, admintoken, Admintoken');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
+    next(err);
 });
 
 // API endpoints
