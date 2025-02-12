@@ -8,26 +8,37 @@ import upload from '../middlewares/multer.js';
 import jwt from 'jsonwebtoken';
 // api for adding docter
 
-const addDoctor = async (req, res) => {
+
+const generateRandomCode = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 10; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+
+  const addDoctor = async (req, res) => {
     try {
         const { name, email, password, speciality, degree, experience, about, fees, address } = req.body;
-        const imageFile = req.file
+        const imageFile = req.file;
 
         // CHECKING FOR ALL DATA TO ADD DOCTOR
         if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address) {
-            return res.json({ success: false, message: "Missing details" })
+            return res.json({ success: false, message: "Missing details" });
         }
-        // validate email
+
+        // Validate email
         if (!validator.isEmail(email)) {
-            return res.json({ success: false, message: "please enter a valid email" })
+            return res.json({ success: false, message: "Please enter a valid email" });
         }
 
-        // validate strong password
+        // Validate strong password
         if (password.length < 8) {
-            return res.json({ success: false, message: "password must be strong" })
+            return res.json({ success: false, message: "Password must be strong" });
         }
 
-        // hashing docter password
+        // Hashing doctor password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -35,22 +46,37 @@ const addDoctor = async (req, res) => {
         if (!imageFile) {
             return res.json({ success: false, message: "Please upload an image" });
         }
+
         // Upload image to Cloudinary
         const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
         const imageUrl = imageUpload.secure_url;
 
+        // Generate a random 10-character code
+        const randomCode = generateRandomCode();
+
         const doctorData = {
-            name, email, image: imageUrl, password: hashedPassword, speciality, degree, experience, about, fees, address: JSON.parse(address), date: Date.now()
-        }
+            name,
+            email,
+            image: imageUrl,
+            password: hashedPassword,
+            speciality,
+            degree,
+            experience,
+            about,
+            fees,
+            address: JSON.parse(address),
+            date: Date.now(),
+            randomCode // Add the random code to the doctor data
+        };
 
         const newDoctor = new doctorModel(doctorData);
-        newDoctor.save();
+        await newDoctor.save();
 
-        res.json({ success: true, message: "Doctor added successfully" })
+        res.json({ success: true, message: "Doctor added successfully"});
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
 };
 

@@ -5,6 +5,8 @@ import { assets } from "../assets/assets_frontend/assets";
 import RelatedDoctors from "../components/RelatedDoctors";
 import { toast } from "react-toastify";
 import axios from "axios";
+import GmeetIcon from "../assets/assets_frontend/google-meet.png"
+import medimeetIcon from "../assets/assets_frontend/medimeet-icon.png"
 import { Calendar, Clock, MapPin, User, Video, Star, Award, Heart } from "lucide-react";
 
 const Appointment = () => {
@@ -19,6 +21,8 @@ const Appointment = () => {
     const [slotTime, setSlotTime] = useState("");
     const [appointmentType, setAppointmentType] = useState("");
     const [loading, setLoading] = useState(false);
+    const [virtualMeetingPlatform, setVirtualMeetingPlatform] = useState("Google Meet");
+    const [initialAppointmentType, setInitialAppointmentType] = useState(""); // New state for initial selection
 
     // Helper function to format time in HH:MM format
     const formatTimeToHHMM = (date) => {
@@ -125,6 +129,7 @@ const Appointment = () => {
                     slotDate,
                     slotTime,
                     appointmentType,
+                    virtualMeetingPlatform, // Include the selected platform
                 },
                 { headers: { token } }
             );
@@ -156,7 +161,7 @@ const Appointment = () => {
 
     return (
         docInfo && (
-            <div className="min-h-screen  py-1 sm:py-5 w-full overflow-x-hidden">
+            <div className="min-h-screen py-1 sm:py-5 w-full overflow-x-hidden">
                 <div className="w-full max-w-6xl mx-auto px-3 sm:px-4">
                     {/* Hero Section */}
                     <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
@@ -218,42 +223,119 @@ const Appointment = () => {
                         {/* Updated Appointment Type Selection */}
                         <div className="bg-white p-2 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg w-full">
                             <h2 className="text-base sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-6">Select Appointment Type</h2>
-                            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+
+                            {/* First Step: Choose between Virtual and In-Person */}
+                            <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
                                 <button
-                                    onClick={() => setAppointmentType("virtual")}
-                                    className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "virtual"
+                                    onClick={() => setInitialAppointmentType("virtual")}
+                                    className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${initialAppointmentType === "virtual"
                                             ? "border-blue-600 bg-blue-50"
                                             : "border-gray-200 hover:border-blue-300"
                                         }`}
                                 >
-                                    <Video className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-400"
-                                        }`} />
-                                    <div className={`text-[10px] sm:text-sm font-medium ${appointmentType === "virtual" ? "text-blue-600" : "text-gray-600"
-                                        }`}>
-                                        Virtual Meeting
-                                    </div>
-                                    <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
-                                        {currencySymbol}{docInfo.fees}
+                                    <Video
+                                        className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${initialAppointmentType === "virtual"
+                                                ? "text-blue-600"
+                                                : "text-gray-400"
+                                            }`}
+                                    />
+                                    <div
+                                        className={`text-[10px] sm:text-sm font-medium ${initialAppointmentType === "virtual"
+                                                ? "text-blue-600"
+                                                : "text-gray-600"
+                                            }`}
+                                    >
+                                        Virtual
                                     </div>
                                 </button>
                                 <button
-                                    onClick={() => setAppointmentType("in-person")}
-                                    className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "in-person"
+                                    onClick={() => {
+                                        setInitialAppointmentType("in-person");
+                                        setAppointmentType("in-person");
+                                    }}
+                                    className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${initialAppointmentType === "in-person"
                                             ? "border-blue-600 bg-blue-50"
                                             : "border-gray-200 hover:border-blue-300"
                                         }`}
                                 >
-                                    <MapPin className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-400"
-                                        }`} />
-                                    <div className={`text-[10px] sm:text-sm font-medium ${appointmentType === "in-person" ? "text-blue-600" : "text-gray-600"
-                                        }`}>
-                                        In-Person Visit
-                                    </div>
-                                    <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
-                                        {currencySymbol}{docInfo.fees}
+                                    <User
+                                        className={`w-4 h-4 sm:w-6 sm:h-6 mb-1 sm:mb-2 mx-auto ${initialAppointmentType === "in-person"
+                                                ? "text-blue-600"
+                                                : "text-gray-400"
+                                            }`}
+                                    />
+                                    <div
+                                        className={`text-[10px] sm:text-sm font-medium ${initialAppointmentType === "in-person"
+                                                ? "text-blue-600"
+                                                : "text-gray-600"
+                                            }`}
+                                    >
+                                        In-Person
                                     </div>
                                 </button>
                             </div>
+
+                            {/* Second Step: Choose between Google Meet and MediMeet if Virtual is selected */}
+                            {initialAppointmentType === "virtual" && (
+                                <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <button
+                                        onClick={() => {
+                                            setAppointmentType("virtual");
+                                            setVirtualMeetingPlatform("Google Meet");
+                                        }}
+                                        className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "virtual" && virtualMeetingPlatform === "Google Meet"
+                                                ? "border-blue-600 bg-blue-50"
+                                                : "border-gray-200 hover:border-blue-300"
+                                            }`}
+                                    >
+                                        <img
+                                            src={GmeetIcon}
+                                            alt="Google Meet"
+                                            className="w-6 h-6 sm:w-8 sm:h-8 mb-1 sm:mb-2 mx-auto"
+                                        />
+                                        <div
+                                            className={`text-[10px] sm:text-sm font-medium ${appointmentType === "virtual" && virtualMeetingPlatform === "Google Meet"
+                                                    ? "text-blue-600"
+                                                    : "text-gray-600"
+                                                }`}
+                                        >
+                                            Google Meet
+                                        </div>
+                                        <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
+                                            {currencySymbol}
+                                            {docInfo.fees}
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setAppointmentType("virtual");
+                                            setVirtualMeetingPlatform("MediMeet");
+                                        }}
+                                        className={`p-2 sm:p-4 rounded-lg border-2 transition-all ${appointmentType === "virtual" && virtualMeetingPlatform === "MediMeet"
+                                                ? "border-blue-600 bg-blue-50"
+                                                : "border-gray-200 hover:border-blue-300"
+                                            }`}
+                                    >
+                                        <img
+                                            src={medimeetIcon}
+                                            alt="MediMeet"
+                                            className="w-6 h-6 sm:w-8 sm:h-8 mb-1 sm:mb-2 mx-auto"
+                                        />
+                                        <div
+                                            className={`text-[10px] sm:text-sm font-medium ${appointmentType === "virtual" && virtualMeetingPlatform === "MediMeet"
+                                                    ? "text-blue-600"
+                                                    : "text-gray-600"
+                                                }`}
+                                        >
+                                            MediMeet
+                                        </div>
+                                        <div className="text-[8px] sm:text-xs text-gray-500 mt-0.5">
+                                            {currencySymbol}
+                                            {docInfo.fees}
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Date & Time Selection */}
@@ -268,8 +350,8 @@ const Appointment = () => {
                                                 onClick={() => setSlotIndex(index)}
                                                 key={index}
                                                 className={`flex-shrink-0 p-2 sm:p-3 lg:p-4 rounded-xl transition-all ${slotIndex === index
-                                                    ? "bg-blue-600 text-white"
-                                                    : "bg-gray-50 hover:bg-gray-100"
+                                                        ? "bg-blue-600 text-white"
+                                                        : "bg-gray-50 hover:bg-gray-100"
                                                     }`}
                                             >
                                                 <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
@@ -290,8 +372,8 @@ const Appointment = () => {
                                                 onClick={() => setSlotTime(item.time)}
                                                 key={index}
                                                 className={`p-2 sm:p-3 rounded-lg text-center transition-all ${item.time === slotTime
-                                                    ? "bg-blue-600 text-white"
-                                                    : "bg-gray-50 hover:bg-gray-100 text-gray-600"
+                                                        ? "bg-blue-600 text-white"
+                                                        : "bg-gray-50 hover:bg-gray-100 text-gray-600"
                                                     }`}
                                             >
                                                 <span className="text-sm whitespace-nowrap">

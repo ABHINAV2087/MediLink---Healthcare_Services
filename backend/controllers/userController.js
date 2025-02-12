@@ -47,7 +47,28 @@ const formatSpecialization = (specialization) => {
 
 // Function to send payment confirmation email
 const sendPaymentConfirmationEmail = async (appointmentData) => {
-  const { userData, docData, slotDate, slotTime, appointmentType, amount, meetLink } = appointmentData;
+  const { userData, docData, slotDate, slotTime, appointmentType, amount, meetLink, virtualMeetingPlatform } = appointmentData;
+
+  let meetingDetails = '';
+  if (appointmentType === 'virtual') {
+    if (virtualMeetingPlatform === 'Google Meet') {
+      meetingDetails = `
+        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="color: #2c3e50; margin-top: 0;">🎥 Video Consultation Link</h3>
+          <p>Join your consultation using this link: <a href="${meetLink}">${meetLink}</a></p>
+        </div>
+      `;
+    } else if (virtualMeetingPlatform === 'MediMeet') {
+      const randomCode = docData.randomCode; // Fetch the random code from the doctor model
+      meetingDetails = `
+        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="color: #2c3e50; margin-top: 0;">🎥 Video Consultation Link</h3>
+          <p>Join your consultation using this link: <a href="https://medimeet-video-chat.onrender.com">https://medimeet-video-chat.onrender.com</a></p>
+          <p>Use the following code to join the meeting: <strong>${randomCode}</strong></p>
+        </div>
+      `;
+    }
+  }
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -69,12 +90,7 @@ const sendPaymentConfirmationEmail = async (appointmentData) => {
         </ul>
       </div>
       
-      ${appointmentType === 'virtual' && meetLink ? `
-        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-          <h3 style="color: #2c3e50; margin-top: 0;">🎥 Video Consultation Link</h3>
-          <p>Join your consultation using this link: <a href="${meetLink}">${meetLink}</a></p>
-        </div>
-      ` : ''}
+      ${meetingDetails}
       
       <div style="margin-top: 30px;">
         <p>For any queries, please contact our support team.</p>
@@ -212,7 +228,7 @@ const updateUserProfile = async (req, res) => {
 // API to book an appointment
 const bookAppointment = async (req, res) => {
   try {
-    const { userId, docId, slotDate, slotTime, appointmentType } = req.body;
+    const { userId, docId, slotDate, slotTime, appointmentType, virtualMeetingPlatform } = req.body;
 
     // Validate appointment type
     if (!appointmentType || !['virtual', 'in-person'].includes(appointmentType)) {
@@ -249,6 +265,8 @@ const bookAppointment = async (req, res) => {
       slotTime,
       slotDate,
       appointmentType,
+      virtualMeetingPlatform, // Include the selected platform
+      randomCode: docData.randomCode, // Ensure randomCode is included
       date: Date.now(),
     };
 
@@ -300,7 +318,7 @@ const cancelAppointment = async (req, res) => {
 const listAppointment = async (req, res) => {
   try {
     const { userId } = req.body;
-    const appointments = await appointmentModel.find({ userId });
+    const appointments = await appointmentModel.find({ userId }).populate('docId', 'randomCode'); // Ensure randomCode is populated
 
     res.json({ success: true, appointments });
   } catch (error) {

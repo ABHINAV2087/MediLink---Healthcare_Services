@@ -29,4 +29,6 @@ userRouter.post("/payment-razorpay", authUser, paymentRazorpay)
 userRouter.post("/verifyRazorpay", authUser, verifyRazorpay)
 userRouter.post('/google-auth', googleAuth);
 
+
+
 export default userRouter;

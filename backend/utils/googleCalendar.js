@@ -49,7 +49,10 @@ const refreshAccessToken = async () => {
  * Function to create a Google Calendar event with a Meet link.
  */
 export const createGoogleMeetEvent = async (appointmentData) => {
-  const { userData, docData, slotDate, slotTime } = appointmentData;
+  const { userData, docData, slotDate, slotTime, virtualMeetingPlatform } = appointmentData;
+  if (virtualMeetingPlatform !== 'Google Meet') {
+    return null; // Do not create a Google Meet link if the platform is not Google Meet
+  }
 
   // Validate slotDate and slotTime formats
   if (!slotDate || !slotDate.match(/^\d{2}_\d{2}_\d{4}$/)) {

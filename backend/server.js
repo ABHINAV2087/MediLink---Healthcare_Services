@@ -20,12 +20,25 @@ const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
+const allowedOrigins = [
+    process.env.FRONTEND_USER_URL || "http://localhost:5173",
+    process.env.FRONTEND_ADMIN_URL || "http://localhost:5174"
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*', // Preferably set specific allowed origins
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'adminToken'],
     credentials: true
 }));
+
+
 
 app.use((req, res, next) => {
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");

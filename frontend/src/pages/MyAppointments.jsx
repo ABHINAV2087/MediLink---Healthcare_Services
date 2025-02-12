@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   Search,
   IndianRupee,
-  Video
+  Video,
+  Link as LinkIcon,
+  Key as KeyIcon,
 } from 'lucide-react';
 
 const MyAppointments = () => {
@@ -36,19 +38,22 @@ const MyAppointments = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        backendUrl + '/api/user/appointments',
+        `${backendUrl}/api/user/appointments`,
         { headers: { token } }
       );
-      
+  
       if (data.success && Array.isArray(data.appointments)) {
         const sortedAppointments = data.appointments
           .map(apt => ({
             ...apt,
-            payment: Boolean(apt.payment), // Ensure payment is boolean
-            meetLink: apt.meetLink || null
+            payment: Boolean(apt.payment),
+            meetLink: apt.meetLink || null,
+            randomCode: apt.randomCode || null, // Ensure randomCode is included
+            virtualMeetingPlatform: apt.virtualMeetingPlatform || null,
           }))
           .sort((a, b) => new Date(b.date) - new Date(a.date));
-        
+  
+        console.log('Processed appointments:', sortedAppointments);
         setAppointments(sortedAppointments);
       } else {
         toast.error('Failed to fetch appointments');
@@ -64,7 +69,7 @@ const MyAppointments = () => {
   const cancelAppointment = async (appointmentId) => {
     try {
       const { data } = await axios.post(
-        backendUrl + '/api/user/cancel-appointment',
+        `${backendUrl}/api/user/cancel-appointment`,
         { appointmentId },
         { headers: { token } }
       );
@@ -76,8 +81,8 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to cancel appointment');
     }
   };
 
@@ -92,30 +97,33 @@ const MyAppointments = () => {
       receipt: order.receipt,
       handler: async (response) => {
         try {
-          setLoading(true); // Show loading state
-          
+          setLoading(true);
+
           const { data } = await axios.post(
-            backendUrl + "/api/user/verifyRazorpay",
+            `${backendUrl}/api/user/verifyRazorpay`,
             response,
             { headers: { token } }
           );
-          
+
           if (data.success) {
-            // Update the specific appointment in state with all the new data
-            setAppointments(prevAppointments => 
+            setAppointments(prevAppointments =>
               prevAppointments.map(appointment => {
                 if (appointment._id === order.receipt) {
-                  return {
+                  const updatedAppointment = {
                     ...appointment,
                     ...data.data.appointment,
                     payment: true,
-                    meetLink: data.data.meetLink
+                    meetLink: data.data.meetLink,
+                    randomCode: data.data.randomCode,
+                    virtualMeetingPlatform: data.data.virtualMeetingPlatform,
                   };
+                  console.log('Updated appointment:', updatedAppointment);
+                  return updatedAppointment;
                 }
                 return appointment;
               })
             );
-            
+
             toast.success('Payment successful!');
             setPayment('');
           }
@@ -124,18 +132,17 @@ const MyAppointments = () => {
           toast.error(error.response?.data?.message || 'Payment verification failed');
         } finally {
           setLoading(false);
-          // Fetch fresh data after everything is done
           getUserAppointments();
         }
       },
       modal: {
-        ondismiss: function() {
+        ondismiss: function () {
           setPayment('');
-          getUserAppointments(); // Refresh appointments when modal is dismissed
+          getUserAppointments();
         }
       }
     };
-    
+
     const rzp = new window.Razorpay(options);
     rzp.open();
   };
@@ -143,7 +150,7 @@ const MyAppointments = () => {
   const appointmentRazorpay = async (appointmentId) => {
     try {
       const { data } = await axios.post(
-        backendUrl + '/api/user/payment-razorpay',
+        `${backendUrl}/api/user/payment-razorpay`,
         { appointmentId },
         { headers: { token } }
       );
@@ -153,8 +160,8 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to initialize payment');
     }
   };
 
@@ -213,6 +220,58 @@ const MyAppointments = () => {
     );
   }
 
+  const renderMeetingInfo = (item) => {
+    if (item.appointmentType !== 'virtual' || !item.payment) {
+      return null;
+    }
+  
+    console.log('Rendering meeting info for:', item);
+  
+    if (item.virtualMeetingPlatform === 'Google Meet' && item.meetLink) {
+      return (
+        <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+          <Video size={16} className="text-blue-600" />
+          <a
+            href={item.meetLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            Join Google Meet
+          </a>
+        </div>
+      );
+    }
+  
+    if (item.virtualMeetingPlatform === 'MediMeet') {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+            <Video size={16} className="text-blue-600" />
+            <a
+              href="https://medimeet-video-chat.onrender.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Join MediMeet
+            </a>
+          </div>
+          {item.randomCode && (
+            <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+              <KeyIcon size={16} className="text-blue-600" />
+              <span className="text-blue-600">
+                Meeting Code: <strong>{item.randomCode}</strong>
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    }
+  
+    return null;
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-screen">
       {/* Header Section */}
@@ -223,7 +282,7 @@ const MyAppointments = () => {
         <div className="h-1 w-20 bg-indigo-600 rounded"></div>
       </div>
 
-      {/* Enhanced Search Bar */}
+      {/* Search Bar */}
       <div className="mb-6 max-w-md mx-auto">
         <div className="relative">
           <input
@@ -271,7 +330,7 @@ const MyAppointments = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   {/* Doctor Image */}
-                  <div className="relative group mx-auto sm:mx-0 -ml-0 sm:ml-0">
+                  <div className="relative group mx-auto sm:mx-0">
                     <img
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shadow-md transition-transform"
                       src={item.docData.image}
@@ -281,7 +340,6 @@ const MyAppointments = () => {
 
                   {/* Doctor Details */}
                   <div className="flex-1 min-w-0">
-                    {/* Doctor Name and Speciality */}
                     <div className="text-center sm:text-left mb-3">
                       <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
                         {item.docData.name}
@@ -292,7 +350,6 @@ const MyAppointments = () => {
                       </p>
                     </div>
 
-                    {/* Address and Time Details */}
                     <div className="space-y-2 mt-3">
                       <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                         <div className="w-8 h-8 rounded-md bg-indigo-100 flex items-center justify-center flex-shrink-0">
@@ -302,7 +359,6 @@ const MyAppointments = () => {
                           {item.docData?.address?.line1 || 'Address not available'}
                           {item.docData?.address?.line2 ? `, ${item.docData.address.line2}` : ''}
                         </span>
-
                       </div>
 
                       <div className="grid sm:grid-cols-2 gap-2">
@@ -320,10 +376,15 @@ const MyAppointments = () => {
                             <Clock size={16} className="text-indigo-600" />
                           </div>
                           <span className="font-medium text-sm text-gray-700">
-                            {item.slotTime}
+                          {item.slotTime}
                           </span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Meeting Link and Code */}
+                    <div className="mt-4">
+                      {renderMeetingInfo(item)}
                     </div>
                   </div>
                 </div>
@@ -362,19 +423,6 @@ const MyAppointments = () => {
                                 </button>
                               )}
                             </>
-                          )}
-
-                          {/* Join Meeting Button */}
-                          {item.appointmentType === 'virtual' && item.meetLink && item.payment && (
-                            <a
-                              href={item.meetLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-                            >
-                              <Video size={16} className="mr-1.5" />
-                              Join Meeting
-                            </a>
                           )}
 
                           <button
