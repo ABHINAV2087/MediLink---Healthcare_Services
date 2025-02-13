@@ -32,6 +32,155 @@
 - **APIs**: Google Calendar API for scheduling & Google Meet integration
 - **Payment Gateway**: Razorpay
 
+## 🏠 Home Page
+Features a user-friendly layout where users can:
+- 🔍 Search for doctors based on specialties.
+- ⭐ View top doctors and their profiles.
+- 📌 Explore additional sections:
+  - About Us
+  - Delivery Information
+  - Privacy Policy
+  - Get in Touch
+- 📌 Footer includes navigation links:
+  - Home
+  - About Us
+  - Delivery Info
+  - Privacy Policy
+  - Contact Us
+
+---
+
+## 🩺 All Doctors Page
+- 📋 Lists all available doctors.
+- 🔍 Users can filter doctors by specialty.
+- 👨‍⚕️ Clicking on a doctor's profile redirects to the **Doctor Appointment Page**.
+
+---
+
+## 📄 About Page
+Provides information about **Prescripto’s vision and mission**.
+### 🏆 Why Choose Us?
+- **Efficiency**: Streamlined appointment process.
+- **Convenience**: Online booking and payment.
+- **Personalization**: Tailored experience based on user preferences.
+- 📌 Footer section with additional links.
+
+---
+
+## 📞 Contact Page
+- 📍 Contains office address and contact details.
+- 👨‍💼 Section to explore job opportunities.
+- 📌 Footer navigation links.
+
+---
+
+## 📅 Doctor Appointment Page
+Displays **detailed information** about the selected doctor:
+- 🖼️ Profile picture
+- 🎓 Qualification
+- 📅 Experience
+- 📝 Brief description
+
+### 📋 Appointment Booking Form
+- 📅 Choose date
+- ⏰ Select time
+- ⏰ Mode of Meeting 
+  -  Virtual meeting
+  - In person meeting
+- ⏰ Prefered platform for meeting 
+  -  Scheduling on Google Meet
+  - Scheduling on Medi Meet with unique code 
+- 💳 Payment method:
+  - Cash
+  - Razorpay
+- 📌 Related doctors section at the bottom.
+- 🔐 Users need to **create an account or log in** before booking an appointment.
+
+---
+
+## 👤 User Profile
+Accessible after login. Users can:
+- 🖼️ Upload profile picture.
+- 📝 Update personal details:
+  - Name
+  - Email
+  - Address
+  - Gender
+  - Birthday
+- 📅 View list of **upcoming and past appointments**.
+- 🚪 Logout option available.
+
+---
+
+## 🗄️ Admin Panel
+### 📊 Dashboard
+- 📈 Displays statistics:
+  - Number of doctors
+  - Number of appointments
+  - Total patients
+  - Latest bookings
+- ❌ Option to **cancel bookings** if needed.
+
+### ➕ Add Doctor
+- 📌 Form to add a new doctor profile:
+  - 🖼️ Image
+  - 🏥 Specialty
+  - 📧 Email
+  - 🔑 Password
+  - 🎓 Degree
+  - 📍 Address
+  - 📅 Experience
+  - 💰 Fees
+  - 📝 Description
+
+### 📋 Doctor List
+- View all **registered doctors** with options to:
+  - ✏️ Edit profile
+  - ❌ Delete profile
+
+### 📅 Appointments
+- List of all **appointments**:
+  - 👤 Patient name
+  - 📅 Age
+  - 🕒 Date & time
+  - 👨‍⚕️ Doctor name
+  - 💰 Fees
+- 🔧 Admin actions:
+  - ✅ Mark as **Completed**
+  - ❌ **Cancel** Appointment
+
+---
+
+## 🩺 Doctor Dashboard
+### 💰 Earnings Overview
+- 📈 Total earnings from **completed appointments**.
+
+### 📅 Appointments List
+- View detailed list of **patient appointments**:
+  - 👤 Patient name
+  - 📅 Age
+  - ⏰ Date & time
+  - 💳 Payment mode
+  - 📌 Status
+- 🔧 Actions:
+  - ✅ Mark appointment as **Completed**
+  - ❌ **Cancel appointment**
+
+### 👨‍⚕️ Profile Management
+- Doctors can update **profile information**:
+  - 📝 Description
+  - 💰 Fees
+  - 📍 Address
+  - 📆 Availability status
+
+---
+
+## 💳 Payment Integration
+Supports multiple payment methods:
+- 💵 **Cash Payment**
+- 💳 **Razorpay Integration**
+- 🔐 Ensures a **secure and smooth payment experience** for users.
+
 ## Installation & Setup
 
 ### Prerequisites
@@ -89,11 +238,15 @@
 ## Deployment
 
 - **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app)**
-- **[Medilink Admin/Doctor Panel](https://medilink-healthcareservices-admin.vercel.app/)**
+- **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
+- **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
+
 
 ## Contributing
 
-We welcome contributions! To get started:
+We welcome contributions! Please feel free to submit issues, fork the repository, and open pull requests.
+
+To get started:
 1. **Fork** the repository
 2. **Create a new branch** (`feature-xyz`)
 3. **Commit your changes** and push to GitHub
