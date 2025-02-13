@@ -238,9 +238,7 @@ Supports multiple payment methods:
 ## Deployment
 
 - **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app)**
-- **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
-- **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
-
+- **[Medilink Admin/Doctor Panel](https://medilink-healthcareservices-admin.vercel.app/)**
 
 ## Contributing
 
