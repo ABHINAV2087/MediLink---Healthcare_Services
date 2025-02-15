@@ -4,6 +4,15 @@
 
 **Medilink** is a cutting-edge Healthcare Management System built on the **MERN stack** to optimize hospital operations and improve patient care. It offers an intuitive and scalable platform to streamline tasks like appointment scheduling, patient record management, real-time doctor-patient communication, seamless integration with Google Calendar for automated scheduling, and secure payment processing via Razorpay.
 
+
+## Deployment
+
+- **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app)**
+- **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
+- **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
+
+
+
 ## Features
 
 ### 🔒 Secure & Scalable
@@ -234,13 +243,6 @@ Supports multiple payment methods:
    # Start Frontend Panel
    cd ../frontend && npm run dev
    ```
-
-## Deployment
-
-- **[Medilink Patient Panel](https://medilink-healthcareservices.vercel.app)**
-- **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
-- **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
-
 
 ## Contributing
 
