@@ -17,7 +17,10 @@
 - **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
 - **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
 
+### If you want to test doctor panel use these credentials :
 
+E-mail :- suresh.patel@medilink.com
+Password :- 123456789
 
 ## Features
 
