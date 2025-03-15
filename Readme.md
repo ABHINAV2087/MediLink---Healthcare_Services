@@ -4,6 +4,12 @@
 
 **Medilink** is a cutting-edge Healthcare Management System built on the **MERN stack** to optimize hospital operations and improve patient care. It offers an intuitive and scalable platform to streamline tasks like appointment scheduling, patient record management, real-time doctor-patient communication, seamless integration with Google Calendar for automated scheduling, and secure payment processing via Razorpay.
 
+# DEMO
+
+[![Watch the Demo](https://img.youtube.com/vi/v4q3-HdnE0g/0.jpg)](https://youtu.be/v4q3-HdnE0g)
+
+[![Click Here](https://img.shields.io/badge/Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/v4q3-HdnE0g)
+
 
 ## Deployment
 
