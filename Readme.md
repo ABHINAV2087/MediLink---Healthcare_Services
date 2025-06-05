@@ -1,15 +1,26 @@
+
 # Medilink - Healthcare Services
 
 ## Overview
 
-**Medilink** is a cutting-edge Healthcare Management System built on the **MERN stack** to optimize hospital operations and improve patient care. It offers an intuitive and scalable platform to streamline tasks like appointment scheduling, patient record management, real-time doctor-patient communication, seamless integration with Google Calendar for automated scheduling, and secure payment processing via Razorpay.
+**Medilink** is a cutting-edge Healthcare Management System built on the **MERN stack** to optimize hospital operations and improve patient care. It offers an intuitive and scalable platform to streamline tasks like appointment scheduling, patient record management, real-time doctor-patient communication, seamless integration with Google Calendar for automated scheduling, secure payment processing via Razorpay, and now includes an **AI-powered medical assistant** for instant medical query support.
 
 # DEMO
 
 [![Watch the Demo](https://img.youtube.com/vi/v4q3-HdnE0g/0.jpg)](https://youtu.be/v4q3-HdnE0g)
 
-[![Click Here](https://img.shields.io/badge/Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/v4q3-HdnE0g)
+## 🧠 AI-Powered Chatbot Feature
 
+An intelligent medical assistant built with **Flask**, **LangChain**, **HuggingFace**, and **Pinecone** that provides instant answers to health-related queries by retrieving verified information from trusted **medical PDFs**.
+
+- 📚 Uses **vector similarity search** over authenticated medical documents.
+- 🤖 Integrates seamlessly into the patient dashboard.
+- 🗣️ Provides conversational responses to patient health-related queries.
+- 🔐 Ensures data privacy and secure query handling.
+
+[![Click Here](https://img.shields.io/badge/Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=__IsLxIoxu8)
+
+---
 
 ## Deployment
 
@@ -17,196 +28,98 @@
 - **[Medilink Doctor Panel](https://medilink-doctor-panel.vercel.app)**
 - **[Medilink Admin Panel](https://medilink-adminpanel.vercel.app)**
 
-### If you want to test doctor panel use these credentials :
+### Test Doctor Panel Credentials:
 
-E-mail :- suresh.patel@medilink.com
-Password :- 123456789
+- **Email:** `suresh.patel@medilink.com`  
+- **Password:** `123456789`
+
+---
 
 ## Features
 
 ### 🔒 Secure & Scalable
-- **User Authentication**: Role-based secure login for **patients, doctors, and administrators**.
-- **Secure Data Storage**: Compliant with healthcare privacy standards, ensuring encrypted and protected patient records.
+- **User Authentication**: Role-based login for **patients, doctors, and admins**.
+- **Secure Data Storage**: Encrypted and privacy-compliant record handling.
 
 ### 📅 Smart Scheduling
-- **Appointment Management**: Patients can **book, reschedule, or cancel** appointments effortlessly.
-- **Google Calendar Sync**: Sync appointments in real-time and auto-generate **Google Meet links** for online consultations.
+- **Appointment Management**: Book/reschedule/cancel with ease.
+- **Google Calendar Sync**: Auto-create **Google Meet links**.
 
 ### 💳 Payment Integration
-- **Razorpay Payment Gateway**: Secure online payments for appointment bookings.
-- **Automated Invoicing**: Generate invoices and payment receipts for patient records.
+- **Razorpay Support**: Secure transactions and receipt generation.
 
-### 🏥 Enhanced Hospital Workflow
-- **Patient Record Management**: Store and manage patient history, diagnoses, and prescriptions securely.
-- **Doctor-Patient Communication**: Real-time **chat and messaging** for consultations and follow-ups.
-- **Admin Dashboard**: Centralized control for **user, appointment, and data management**.
+### 💬 Real-Time Communication
+- **Doctor-Patient Messaging**: In-app real-time chat.
+- **AI Chatbot Support**: Instant answers to medical queries.
+
+### 🧠 AI Medical Assistant (NEW)
+- **Built with Flask + LangChain + Pinecone + HuggingFace**.
+- **Retrieves data** from medical PDFs using vector similarity.
+- **Secure, accurate, and reliable** responses to health queries.
+
+### 🏥 Admin & Doctor Dashboards
+- Full control over appointments, users, earnings, and data.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: React.js (with Redux for state management)
+- **Frontend**: React.js, Redux
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB
-- **Authentication**: JWT (JSON Web Tokens)
-- **APIs**: Google Calendar API for scheduling & Google Meet integration
-- **Payment Gateway**: Razorpay
-
-## 🏠 Home Page
-Features a user-friendly layout where users can:
-- 🔍 Search for doctors based on specialties.
-- ⭐ View top doctors and their profiles.
-- 📌 Explore additional sections:
-  - About Us
-  - Delivery Information
-  - Privacy Policy
-  - Get in Touch
-- 📌 Footer includes navigation links:
-  - Home
-  - About Us
-  - Delivery Info
-  - Privacy Policy
-  - Contact Us
+- **AI Chatbot**: Flask, LangChain, HuggingFace Transformers, Pinecone
+- **Authentication**: JWT
+- **Integrations**: Google Calendar API, Razorpay
 
 ---
 
-## 🩺 All Doctors Page
-- 📋 Lists all available doctors.
-- 🔍 Users can filter doctors by specialty.
-- 👨‍⚕️ Clicking on a doctor's profile redirects to the **Doctor Appointment Page**.
+## Pages & Panels
 
----
+<details>
+  <summary>Click to expand</summary>
 
-## 📄 About Page
-Provides information about **Prescripto’s vision and mission**.
-### 🏆 Why Choose Us?
-- **Efficiency**: Streamlined appointment process.
-- **Convenience**: Online booking and payment.
-- **Personalization**: Tailored experience based on user preferences.
-- 📌 Footer section with additional links.
+### 🏠 Home Page
+- Doctor search, featured doctors, and site info.
 
----
+### 🩺 All Doctors Page
+- Filterable doctor listing.
 
-## 📞 Contact Page
-- 📍 Contains office address and contact details.
-- 👨‍💼 Section to explore job opportunities.
-- 📌 Footer navigation links.
+### 📄 About Page
+- Project vision, benefits, and footer links.
 
----
+### 📞 Contact Page
+- Office info and job opportunities.
 
-## 📅 Doctor Appointment Page
-Displays **detailed information** about the selected doctor:
-- 🖼️ Profile picture
-- 🎓 Qualification
-- 📅 Experience
-- 📝 Brief description
+### 📅 Doctor Appointment Page
+- Detailed profiles, booking options, and secure payments.
 
-### 📋 Appointment Booking Form
-- 📅 Choose date
-- ⏰ Select time
-- ⏰ Mode of Meeting 
-  -  Virtual meeting
-  - In person meeting
-- ⏰ Prefered platform for meeting 
-  -  Scheduling on Google Meet
-  - Scheduling on Medi Meet with unique code 
-- 💳 Payment method:
-  - Cash
-  - Razorpay
-- 📌 Related doctors section at the bottom.
-- 🔐 Users need to **create an account or log in** before booking an appointment.
+### 👤 User Profile
+- Appointment history, personal info editing, and logout.
 
----
+### 🗄️ Admin Panel
+- Add/edit doctors, manage appointments and users.
 
-## 👤 User Profile
-Accessible after login. Users can:
-- 🖼️ Upload profile picture.
-- 📝 Update personal details:
-  - Name
-  - Email
-  - Address
-  - Gender
-  - Birthday
-- 📅 View list of **upcoming and past appointments**.
-- 🚪 Logout option available.
+### 🩺 Doctor Dashboard
+- Track appointments, earnings, and update profile.
 
----
-
-## 🗄️ Admin Panel
-### 📊 Dashboard
-- 📈 Displays statistics:
-  - Number of doctors
-  - Number of appointments
-  - Total patients
-  - Latest bookings
-- ❌ Option to **cancel bookings** if needed.
-
-### ➕ Add Doctor
-- 📌 Form to add a new doctor profile:
-  - 🖼️ Image
-  - 🏥 Specialty
-  - 📧 Email
-  - 🔑 Password
-  - 🎓 Degree
-  - 📍 Address
-  - 📅 Experience
-  - 💰 Fees
-  - 📝 Description
-
-### 📋 Doctor List
-- View all **registered doctors** with options to:
-  - ✏️ Edit profile
-  - ❌ Delete profile
-
-### 📅 Appointments
-- List of all **appointments**:
-  - 👤 Patient name
-  - 📅 Age
-  - 🕒 Date & time
-  - 👨‍⚕️ Doctor name
-  - 💰 Fees
-- 🔧 Admin actions:
-  - ✅ Mark as **Completed**
-  - ❌ **Cancel** Appointment
-
----
-
-## 🩺 Doctor Dashboard
-### 💰 Earnings Overview
-- 📈 Total earnings from **completed appointments**.
-
-### 📅 Appointments List
-- View detailed list of **patient appointments**:
-  - 👤 Patient name
-  - 📅 Age
-  - ⏰ Date & time
-  - 💳 Payment mode
-  - 📌 Status
-- 🔧 Actions:
-  - ✅ Mark appointment as **Completed**
-  - ❌ **Cancel appointment**
-
-### 👨‍⚕️ Profile Management
-- Doctors can update **profile information**:
-  - 📝 Description
-  - 💰 Fees
-  - 📍 Address
-  - 📆 Availability status
+</details>
 
 ---
 
 ## 💳 Payment Integration
-Supports multiple payment methods:
-- 💵 **Cash Payment**
-- 💳 **Razorpay Integration**
-- 🔐 Ensures a **secure and smooth payment experience** for users.
+- 💵 Cash or 💳 Razorpay
+- 🔒 Secure checkout and invoicing
+
+---
 
 ## Installation & Setup
 
 ### Prerequisites
-- **Node.js** installed
-- **MongoDB** (local or cloud instance)
-- **Git** installed
-- **Google API credentials** for Calendar integration
-- **Razorpay API credentials** for payment processing
+- **Node.js**, **MongoDB**, **Git**
+- **Google API Credentials** (Calendar)
+- **Razorpay API Keys**
+- **Python 3.9+** (for AI assistant)
+- **HuggingFace Access Token**, **Pinecone API Key**
 
 ### Step-by-Step Setup
 
@@ -220,16 +133,20 @@ Supports multiple payment methods:
    ```bash
    # Backend
    cd backend && npm install
-   
+
    # Frontend
    cd ../frontend && npm install
-   
+
    # Admin Panel
    cd ../admin && npm install
+
+   # AI Chatbot (Python Backend)
+   cd ../chatbot && pip install -r requirements.txt
    ```
 
-3. **Set up environment variables**
-   - Create a `.env` file in the `backend` directory and add:
+3. **Set environment variables**
+
+   - `backend/.env`
      ```ini
      MONGODB_URI=your_mongodb_connection_string
      JWT_SECRET=your_jwt_secret
@@ -239,33 +156,45 @@ Supports multiple payment methods:
      RAZORPAY_KEY_ID=your_razorpay_key_id
      RAZORPAY_KEY_SECRET=your_razorpay_key_secret
      ```
-   - Replace placeholders with actual credentials.
 
-4. **Run the application**
+   - `chatbot/.env`
+     ```ini
+     HF_TOKEN=your_huggingface_token
+     PINECONE_API_KEY=your_pinecone_api_key
+     PINECONE_ENVIRONMENT=gcp-starter
+     PINECONE_INDEX_NAME=medical-chatbot-index
+     ```
+
+4. **Run the project**
    ```bash
-   # Start Backend Server
+   # Start Node Backend
    cd backend && npm run server
 
    # Start Admin Panel
    cd ../admin && npm run dev
 
-   # Start Frontend Panel
+   # Start Frontend
    cd ../frontend && npm run dev
+
+   # Start AI Chatbot Flask App
+   cd ../chatbot && python app.py
    ```
+
+---
 
 ## Contributing
 
-We welcome contributions! Please feel free to submit issues, fork the repository, and open pull requests.
+We welcome your contributions!  
+Just fork, branch, commit your changes, and open a pull request 🚀
 
-To get started:
-1. **Fork** the repository
-2. **Create a new branch** (`feature-xyz`)
-3. **Commit your changes** and push to GitHub
-4. **Submit a pull request** 🚀
+---
 
 ## Contact & Support
-For inquiries, feature requests, or support, contact **[Abhinav Tirole](mailto:tiroleabhinav@gmail.com)**.
+
+For queries or collaboration, reach out to **[Abhinav Tirole](mailto:tiroleabhinav@gmail.com)**.
+
+---
 
 ## License
 
-This project is **licensed under the MIT License**.
+Licensed under the **MIT License**.
